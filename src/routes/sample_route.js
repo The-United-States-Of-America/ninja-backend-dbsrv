@@ -1,7 +1,7 @@
-let express = require('express');
-let router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-router.get('/hello_world', function(req, res) {
+router.get('/hello_world', (req, res) => {
   return res.send('Hello World!');
 });
 
