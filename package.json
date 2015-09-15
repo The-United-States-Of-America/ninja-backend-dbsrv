@@ -1,0 +1,22 @@
+{
+  "name": "restful-boilerplate",
+  "version": "0.0.1",
+  "description": "Boilerplate code to begin a Node.js ECMA6 Restful Backend",
+  "private": false,
+  "engines": {
+    "node": "4.0.0"
+  },
+  "dependencies": {
+    "body-parser": "~1.13.3",
+    "cors": "~2.7.1",
+    "express": "~4.13.3",
+    "mongoose": "~4.1.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PranavSathy/node-backend-boilerplate"
+  },
+  "scripts": {
+    "start": "node --use_strict src/app.js"
+  }
+}
