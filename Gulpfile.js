@@ -1,31 +1,38 @@
 require('babel/register');
 
-var gulp = require("gulp");
-var babel = require("gulp-babel");
-var esdoc = require("gulp-esdoc");
-var del = require('del');
+const gulp = require("gulp"),
+      babel = require("gulp-babel"),
+      esdoc = require("gulp-esdoc"),
+      eslint = require('gulp-eslint'),
+      mocha = require('gulp-mocha'),
+      del = require('del');
 
-var mocha = require('gulp-mocha');
+gulp.task('lint', () => {
+    return gulp.src(['src/**/*.js'])
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failOnError());
+});
 
-gulp.task('test', function() {
+gulp.task('test', () => {
   return gulp.src('test/**/*.js')
     .pipe(mocha());
 })
 
-gulp.task('clean', function() {
+gulp.task('clean', () => {
     return del(['docs', 'dist']);
 });
 
-gulp.task('transpile', ['clean'], function() {
+gulp.task('transpile', ['clean'], () => {
   return gulp.src("src/**/*.js")
     .pipe(babel())
     .pipe(gulp.dest("dist"));
 });
 
-gulp.task('document', ['clean'], function() {
+gulp.task('document', ['clean'], () => {
   return gulp.src("./src")
     .pipe(esdoc({ destination: "./docs" }));
 });
 
 gulp.task('build', ['transpile', 'document']);
-gulp.task('default', ['build']);
+gulp.task('default', ['lint', 'build']);

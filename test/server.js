@@ -1,12 +1,18 @@
 const should = require('chai').should(),
       expect = require('chai').expect(),
       supertest = require('supertest'),
-      api = supertest('http://localhost:8000');
+      config = require('../dist/config'),
+      api = supertest('http://localhost:' + config.development.port);
 
-describe('SimpleTest', function() {
-  it('should return a 200 response', function(done) {
+describe('SimpleTest', () => {
+  let server;
+  beforeEach( () => server = require('../dist/app') );
+  afterEach( (done) => server.close(done) );
+
+  it('should return a 200 response', (done) => {
     api.get('/sample_route/hello_world')
        .set('Accept', 'application/json')
        .expect(200, done);
   });
+
 });

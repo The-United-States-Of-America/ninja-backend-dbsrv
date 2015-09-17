@@ -2,7 +2,7 @@ import Router from './Router';
 
 const cluster = require('cluster');
 
-if (cluster.isMaster) {
+if (cluster.isMaster && !module.parent) {
   const exemptCores = 0;
   const cpuCount = (require('os')).cpus().length;
 
@@ -10,12 +10,8 @@ if (cluster.isMaster) {
     cluster.fork(i);
   }
 
-  cluster.on('exit', function(worker) {
-    return cluster.fork();
-  });
+  cluster.on('exit', () => cluster.fork());
 } else {
-  //const Router = require('./Router');
-
   const express = require('express');
   const cors = require('cors');
   const bodyParser = require('body-parser');
@@ -30,5 +26,8 @@ if (cluster.isMaster) {
   // Setup our Router
   new Router(app)
 
-  app.listen(config.port);
+  let server = app.listen(config.port);
+
+  // Export our server, so Mocha can start and stop it.
+  if(module.parent) module.exports = server;
 }

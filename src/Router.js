@@ -1,22 +1,21 @@
 /**
  * The Router is responsible for aggregating all the various routing endpoints within the application, and serving them.
+ * @example <caption>Use only once</caption>
+ * new Router(app);
  */
 export default class Router {
   /**
+   * The constructor injects routes into the Express application passed in.
    * @param {express()} app An express application, used to setup routing.
    */
   constructor(app) {
-    this.app = app;
-
     // Define routes here
-    this.routes = {
+    const routes = {
       sample_route: require('./routes/sample_route')
     };
 
-    for (let route in this.routes) {
-      this.app.use('/' + route, this.routes[route]);
+    for (let route in routes) {
+      app.use('/' + route, routes[route]);
     }
   }
 }
-
-//module.exports = Router;
