@@ -1,3 +1,5 @@
+import Router from './Router';
+
 const cluster = require('cluster');
 
 if (cluster.isMaster) {
@@ -12,13 +14,11 @@ if (cluster.isMaster) {
     return cluster.fork();
   });
 } else {
-  const Router = require('./Router');
+  //const Router = require('./Router');
 
   const express = require('express');
   const cors = require('cors');
   const bodyParser = require('body-parser');
-
-  //let mongoose = require('mongoose');
 
   const app = express();
   const env = process.env.NODE_ENV || 'development';
@@ -26,8 +26,6 @@ if (cluster.isMaster) {
 
   app.use(bodyParser.json());
   app.use(cors());
-
-  //mongoose.connect(config.db_url);
 
   // Setup our Router
   new Router(app)
