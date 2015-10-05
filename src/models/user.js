@@ -1,5 +1,5 @@
 import db from '../Database';
-import Sequelize from 'Sequelize';
+import Sequelize from 'sequelize';
 
 /**
  * The sequelize user model, so that we can create backrefs in other models.

@@ -1,7 +1,7 @@
 import db from '../Database';
 import { user, User, UserTypes } from './user';
 
-import Sequelize from 'Sequelize';
+import Sequelize from 'sequelize';
 
 const client = db.define('tb_Client', {
   id: {
