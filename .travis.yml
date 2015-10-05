@@ -16,7 +16,7 @@ script:
     - gulp
     - gulp test
 
-after_succes:
+after_success:
     - 'cat ./coverage/lcov.info | ./node_modules/.bin/coveralls'
     - bash ./deploy_docs.sh
 
