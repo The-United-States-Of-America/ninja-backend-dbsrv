@@ -1,7 +1,7 @@
 {
-  "name": "ninja-backend-boilerplate",
+  "name": "ninja-backend-dbsrv",
   "version": "0.0.1",
-  "description": "Boilerplate code to begin a Node.js ECMA6 Restful Backend w/ Unit Testing and ESDoc",
+  "description": "Database Microservice",
   "private": false,
   "engines": {
     "node": ">=0.12.x"
@@ -11,11 +11,14 @@
     "cors": "~2.7.1",
     "express": "~4.13.3",
     "gulp": "^3.9.0",
-    "mocha": "^2.3.2"
+    "mocha": "^2.3.2",
+    "pg": "^4.4.2",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^3.11.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/The-United-States-Of-America/ninja-backend-boilerplate"
+    "url": "https://github.com/The-United-States-Of-America/ninja-backend-dbsrv"
   },
   "scripts": {
     "start": "node dist/app.js"
