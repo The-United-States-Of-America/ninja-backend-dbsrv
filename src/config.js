@@ -20,7 +20,7 @@ const config = {
       port: process.env.DB_PORT,
       logging: false
     }
-  }
+  },
   travis: {
     port: 3000,
     database: {
