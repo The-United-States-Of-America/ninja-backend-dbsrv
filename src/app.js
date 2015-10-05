@@ -6,7 +6,7 @@ import os from 'os';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import config from './Config';
+import config from './config';
 
 if (cluster.isMaster && !module.parent) {
   const exemptCores = 0;
