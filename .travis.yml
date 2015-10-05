@@ -6,7 +6,7 @@ addons:
   postgresql: "9.4"
 
 before_install:
-    - npm install -g gulp
+    - npm install -g gulp esdoc mocha
 
 script:
     - gulp
