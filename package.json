@@ -21,7 +21,8 @@
     "url": "https://github.com/The-United-States-Of-America/ninja-backend-dbsrv"
   },
   "scripts": {
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "test": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --compilers js:babel/register --colors --reporter spec test/"
   },
   "devDependencies": {
     "babel": "^5.8.23",
@@ -33,8 +34,8 @@
     "gulp-babel": "^5.2.1",
     "gulp-esdoc": "0.0.4",
     "gulp-eslint": "^1.0.0",
-    "gulp-istanbul": "^0.10.1",
-    "gulp-mocha": "^2.1.3",
+    "istanbul": "^0.3.22",
+    "mocha-lcov-reporter": "^1.0.0",
     "supertest": "^1.1.0"
   }
 }

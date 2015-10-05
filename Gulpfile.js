@@ -3,9 +3,7 @@ require('babel/register');
 const gulp = require("gulp"),
       babel = require("gulp-babel"),
       esdoc = require("gulp-esdoc"),
-      eslint = require('gulp-eslint'),
-      istanbul = require('gulp-istanbul'),
-      mocha = require('gulp-mocha'),
+      eslint = require('gulp-eslint')
       del = require('del');
 
 gulp.task('lint', () => {
@@ -14,13 +12,6 @@ gulp.task('lint', () => {
         .pipe(eslint.format())
         .pipe(eslint.failOnError());
 });
-
-gulp.task('test', () => {
-  return gulp.src('test/**/*.js')
-    .pipe(mocha())
-    .pipe(istanbul.writeReports())
-    .pipe(istanbul.enforceThresholds({ thresholds: { global: 90 } }));
-})
 
 gulp.task('clean', () => {
     return del(['docs', 'dist']);
