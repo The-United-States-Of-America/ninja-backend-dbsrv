@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+    - stable
+
+addons:
+  postgresql: "9.4"
+
+before_install:
+    - npm install -g gulp
+
+script:
+    - gulp
+    - bash ./deploy_docs.sh
+
+env:
+  global:
+  - GH_REF: github.com/The-United-States-Of-America/ninja-backend-dbsrv.git
+  - GH_TOKEN: a850d7310e8d3f7bf03a989a852568f692243c74
