@@ -4,6 +4,7 @@ const gulp = require("gulp"),
       babel = require("gulp-babel"),
       esdoc = require("gulp-esdoc"),
       eslint = require('gulp-eslint'),
+      istanbul = require('gulp-istanbul'),
       mocha = require('gulp-mocha'),
       del = require('del');
 
@@ -16,7 +17,9 @@ gulp.task('lint', () => {
 
 gulp.task('test', () => {
   return gulp.src('test/**/*.js')
-    .pipe(mocha());
+    .pipe(mocha())
+    .pipe(istanbul.writeReports())
+    .pipe(istanbul.enforceThresholds({ thresholds: { global: 90 } }));
 })
 
 gulp.task('clean', () => {

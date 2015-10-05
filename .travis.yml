@@ -8,9 +8,14 @@ addons:
 before_install:
     - npm install -g gulp esdoc mocha
     - chmod 755 ./deploy_docs.sh
+    - psql -c 'create database ninja_db;' -U postgres
+    - psql -U postgres -d ninja_db -a -f ./schema/schema.sql
+    - psql -U postgres -d ninja_db -a -f ./schema/data.sql
 
 script:
     - gulp
+
+after_succes:
     - bash ./deploy_docs.sh
 
 env:

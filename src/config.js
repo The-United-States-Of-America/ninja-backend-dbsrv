@@ -21,6 +21,17 @@ const config = {
       logging: false
     }
   }
+  travis: {
+    port: 3000,
+    database: {
+      name: 'ninja_db',
+      user: 'postgres',
+      pass: '',
+
+      port: 5432,
+      logging: false
+    }
+  }
 };
 
 /**
