@@ -1,6 +1,6 @@
 import chai from 'chai';
 import supertest from 'supertest';
-import config from '../dist/config';
+import config from '../src/config';
 
 const should = chai.should(),
       expect = chai.expect,
@@ -8,7 +8,7 @@ const should = chai.should(),
 
 describe('Client Tests', () => {
   let server;
-  before( () => server = require('../dist/app') );
+  before( () => server = require('../src/app') );
   after( (done) => server.close(done) );
 
   it('should create a new user', (done) => {
