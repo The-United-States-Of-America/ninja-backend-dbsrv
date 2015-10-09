@@ -7,9 +7,9 @@ const should = chai.should(),
       api = supertest('http://localhost:' + config.port);
 
 describe('Client Tests', () => {
-  let server;
-  before( () => server = require('../src/app') );
-  after( (done) => server.close(done) );
+  // let server;
+  // before( () => server = require('../src/app') );
+  // after( (done) => server.close(done) );
 
   it('should create a new user', (done) => {
     api.post('/client/create_user')

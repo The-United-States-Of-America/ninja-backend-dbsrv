@@ -21,6 +21,7 @@
     "url": "https://github.com/The-United-States-Of-America/ninja-backend-dbsrv"
   },
   "scripts": {
+    "travis": "(npm start &)",
     "start": "node dist/app.js",
     "test": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --compilers js:babel/register --colors --reporter spec test/"
   },

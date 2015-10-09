@@ -1,21 +1,21 @@
-import { Client } from '../models/client';
+import { Family } from '../models/family';
 import Express from 'express'
 
 const rtr = Express.Router();
 
 /**
- * ClientRoute serves all patient related endpoints.
+ * FamilyRoute serves all family related endpoints.
  */
-export default class ClientRoute {
+export default class FamilyRoute {
   /**
    * Place all routes inside the constructor, so that they will be built.
    */
   constructor() {
 
-    rtr.post('/create_user', (req, res) => {
-      Client.create(req.body, (user, err) => {
+    rtr.post('/create_family', (req, res) => {
+      Family.create(req.body, (fam, err) => {
         if(err) return res.status(400).send(err);
-        else return res.send(user.get({plain: true}));
+        else return res.send(fam.get({plain: true}));
       });
     });
 

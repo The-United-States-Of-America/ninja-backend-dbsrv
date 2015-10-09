@@ -14,6 +14,7 @@ before_install:
 
 script:
     - gulp
+    - npm run travis
     - npm test
 
 after_success:
