@@ -30,6 +30,25 @@ export default class Client {
   }
 
   /**
+   * Get a user based on the user ID.
+   * @param {object} [clientId] - User object with the user ID.
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Client.create({
+        ssn: 123456789,
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@test.com',
+        password: 'test'
+     })
+   */
+  static get(clientId, cb) {
+    MClient.where('id', clientId).fetch({withRelated: ['family']})
+    .then((user) => cb(user.toJSON()))
+    .catch((err) => cb(null, err));
+  }
+
+  /**
    * Join a family.
    * @param {object} [query_obj] - Query object that houses the client ID
    * @param {function} [cb] - Callback function that takes two argument (obj, err)

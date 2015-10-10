@@ -24,6 +24,13 @@ export default class ClientRoute {
    */
   constructor() {
 
+    rtr.get('/get/:id', (req, res) => {
+      Client.get(req.params.id, (user, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(user);
+      });
+    });
+
     rtr.post('/create', (req, res) => {
       Client.create(req.body, (user, err) => {
         if(err) return res.status(400).send(err);
