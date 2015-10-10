@@ -40,4 +40,18 @@ export class Family {
     .catch((err) => cb(null, err));
   }
 
+  /**
+   * Get a family by its ID.
+   * @param {object} [fam_id] - ID of the family to retrieve
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Family.create({
+        name: 'Smith Family'
+     })
+   */
+  static get(fam_id, cb) {
+    family.findById(fam_id)
+    .then((obj) => cb(obj))
+    .catch((err) => cb(null, err));
+  }
 }

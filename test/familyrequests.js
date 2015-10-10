@@ -6,32 +6,34 @@ const should = chai.should(),
       expect = chai.expect,
       api = supertest('http://localhost:' + config.port);
 
-describe('Family Tests', () => {
+describe('Family Invite Tests', () => {
   let testId = 0;
 
-  it('should create a new family', (done) => {
-    api.post('/family/create')
+  it('should create a new invite', (done) => {
+    api.post('/family/invite')
     .set('Accept', 'application/json')
     .send({
-      name: 'Test Family'
+      clientId: 1,
+      familyId: 1
     })
     .expect(200)
     .end((err, res) => {
-      testId = res.body.id;
-      expect(res.body.name).to.equal('Test Family');
+      testId = parseInt(res.body.familyId);
+      expect(parseInt(res.body.clientId)).to.equal(1);
+      expect(parseInt(res.body.familyId)).to.equal(1);
       done();
     });
   });
 
-  it('should create another new family', (done) => {
-    api.post('/family/create')
+  it('see if user has invite', (done) => {
+    api.post('/client/get_invites')
     .set('Accept', 'application/json')
     .send({
-      name: 'Test Family'
+      clientId: 1
     })
     .expect(400)
     .end((err, res) => {
-      expect(res.body.id).to.not.equal(testId);
+      expect(parseInt(res.body.id)).to.equal(testId);
       expect(res.body.name).to.equal('Test Family');
       done();
     });

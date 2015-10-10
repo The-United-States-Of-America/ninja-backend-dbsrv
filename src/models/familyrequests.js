@@ -1,12 +1,8 @@
 import db from '../Database';
-import { client } from '../client';
-import { family } from '../family';
+import { Family } from './family';
 
 import Sequelize from 'sequelize';
 
-/**
- * The sequelize family model, so that we can create backrefs in other models.
- */
 const familyrequests = db.define('tb_FamilyRequests', {
   clientId: {
     type: Sequelize.BIGINT,
@@ -14,7 +10,7 @@ const familyrequests = db.define('tb_FamilyRequests', {
     field: 'clientId',
 
     references: {
-      model: client,
+      model: "tb_Client",
       key: 'id',
       deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
     }
@@ -26,7 +22,7 @@ const familyrequests = db.define('tb_FamilyRequests', {
     field: 'familyId',
 
     references: {
-      model: family,
+      model: "tb_Family",
       key: 'id',
       deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
     }
@@ -39,7 +35,7 @@ const familyrequests = db.define('tb_FamilyRequests', {
 export default class FamilyRequests {
 
   /**
-   * FamilyRequests create static function, used for inviting people into a family.
+   * Create a new invite for a user into a family.
    * @param {object} [famreq_obj] - The JSON Family Request Object that is destructured then stores
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
@@ -51,6 +47,25 @@ export default class FamilyRequests {
   static create(famreq_obj, cb) {
     familyrequests.create(famreq_obj)
     .then((obj) => cb(obj))
+    .catch((err) => cb(null, err));
+  }
+
+  /**
+   * Get all the invites for a given user.
+   * @param {object} [query] - Query object
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * FamilyRequests.get({
+        clientId: 1
+     })
+   * @example
+   * FamilyRequests.get({
+        familyId: 3
+     })
+   */
+  static get(query, cb) {
+    familyrequests.findById(query.clientId)
+    .then((fam) => Family.get(fam.familyId, cb))
     .catch((err) => cb(null, err));
   }
 

@@ -7,15 +7,11 @@ const should = chai.should(),
       api = supertest('http://localhost:' + config.port);
 
 describe('Client Tests', () => {
-  // let server;
-  // before( () => server = require('../src/app') );
-  // after( (done) => server.close(done) );
-
   it('should create a new user', (done) => {
-    api.post('/client/create_user')
+    api.post('/client/create')
     .set('Accept', 'application/json')
     .send({
-      ssn: 661184972,
+      ssn: 123456789,
       firstName: 'Pranav',
       lastName: 'Sathy',
       email: 'sathyp@rpi.edu',
@@ -27,17 +23,17 @@ describe('Client Tests', () => {
       expect(res.body.lastName).to.equal('Sathy');
       expect(res.body.email).to.equal('sathyp@rpi.edu');
       expect(res.body.password).to.equal('test');
-      expect(parseInt(res.body.ssn)).to.equal(661184972);
+      expect(parseInt(res.body.ssn)).to.equal(123456789);
       expect(res.body.familyId).to.equal(null);
       done();
     });
   });
 
   it('should return unique violation error', (done) => {
-    api.post('/client/create_user')
+    api.post('/client/create')
     .set('Accept', 'application/json')
     .send({
-      ssn: 661184972,
+      ssn: 123456789,
       firstName: 'New',
       lastName: 'Guy',
       email: 'sathyp@rpi.edu',
