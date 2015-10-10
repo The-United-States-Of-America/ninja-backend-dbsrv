@@ -31,13 +31,13 @@ export default class Client {
 
   /**
    * Get a user based on the user ID.
-   * @param {number} [clientId] - User object with the user ID.
+   * @param {number} [clientEmail] - The user email to query.
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
    * Client.get(1)
    */
-  static get(clientId, cb) {
-    MClient.where('id', clientId).fetch({withRelated: ['family']})
+  static get(clientEmail, cb) {
+    MClient.where('email', clientEmail).fetch({withRelated: ['family']})
     .then((user) => cb(user.toJSON()))
     .catch((err) => cb(null, err));
   }
