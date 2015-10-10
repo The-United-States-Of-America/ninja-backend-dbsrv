@@ -29,7 +29,7 @@ describe('Family Tests', () => {
     .send({
       name: 'Test Family'
     })
-    .expect(400)
+    .expect(200)
     .end((err, res) => {
       expect(res.body.id).to.not.equal(testId);
       expect(res.body.name).to.equal('Test Family');

@@ -1,78 +1,13 @@
-import db from '../Database';
-import { user, User, UserTypes } from './user';
-import { family } from './family';
-
-import Sequelize from 'sequelize';
-
-/**
- * The sequelize client model, so that we can create backrefs in other models.
- */
-export const client = db.define('tb_Client', {
-  id: {
-    type: Sequelize.BIGINT,
-    primaryKey: true,
-    autoIncrement: true,
-    field: 'id',
-
-    references: {
-      model: user,
-      key: 'id',
-      deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
-
-  familyId: {
-    type: Sequelize.BIGINT,
-    allowNull: true,
-    field: 'familyId',
-
-    references: {
-      model: family,
-      key: 'id',
-      deferrable: Sequelize.Deferrable.INITIALLY_IMMEDIATE
-    }
-  },
-
-  ssn: {
-    type: Sequelize.BIGINT,
-    allowNull: false,
-    unique: true,
-    field: 'ssn'
-  },
-
-  firstName: {
-    type: Sequelize.STRING(64),
-    allowNull: false,
-    field: 'firstName'
-  },
-
-  lastName: {
-    type: Sequelize.STRING(64),
-    allowNull: false,
-    field: 'lastName'
-  },
-
-  email: {
-    type: Sequelize.STRING(64),
-    allowNull: false,
-    unique: true,
-    field: 'email'
-  },
-
-  password: {
-    type: Sequelize.STRING(1024),
-    allowNull: false,
-    field: 'password'
-  }
-});
+import { User, UserTypes } from './user';
+import { MClient } from './models';
 
 /**
  * The Client defines the patient table within the UHRNinja database
  */
-export class Client {
+export default class Client {
 
   /**
-   * Client create static function, facilitates creation of new User and Client.
+   * Create a new client after creating a new user.
    * @param {object} [user_obj] - The JSON User Object that is destructured then stores
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
@@ -85,12 +20,32 @@ export class Client {
      })
    */
   static create(user_obj, cb) {
-    User.create(UserTypes.PATIENT, (user) => {
+    User.create(UserTypes.PATIENT, (user, err) => {
+      if(err) return cb(null, err);
       user_obj.id = user.id;
-      client.create(user_obj)
-      .then((obj) => cb(obj))
+      new MClient(user_obj).save(null, {method: 'insert'})
+      .then((user) => cb(user.toJSON()))
       .catch((err) => cb(null, err));
     });
+  }
+
+  /**
+   * Join a family.
+   * @param {object} [query_obj] - Query object that houses the client ID
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Client.joinFamily({
+        clientId: 1,
+        familyId: 1
+     })
+   */
+  static joinFamily(query_obj, cb) {
+    new MClient({
+      id: query_obj.clientId,
+      familyId: query_obj.familyId
+    }).save()
+    .then((obj) => cb(obj))
+    .catch((err) => cb(null, err));
   }
 
 }

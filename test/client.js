@@ -24,7 +24,6 @@ describe('Client Tests', () => {
       expect(res.body.email).to.equal('sathyp@rpi.edu');
       expect(res.body.password).to.equal('test');
       expect(parseInt(res.body.ssn)).to.equal(123456789);
-      expect(res.body.familyId).to.equal(null);
       done();
     });
   });
@@ -41,9 +40,9 @@ describe('Client Tests', () => {
     })
     .expect(400)
     .end((err, res) => {
-      expect(res.body.name).to.equal("SequelizeUniqueConstraintError");
-      expect(res.body.message).to.equal("Validation error");
-      expect(res.body.errors[0].message).to.equal("email must be unique");
+      expect(res.body.name).to.equal("error");
+      expect(parseInt(res.body.code)).to.equal(23505);
+      expect(res.body.detail).to.equal('Key (email)=(sathyp@rpi.edu) already exists.');
       done();
     });
   });

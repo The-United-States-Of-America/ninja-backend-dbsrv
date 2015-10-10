@@ -1,29 +1,10 @@
-import db from '../Database';
+import { MFamily } from './models';
 
-import Sequelize from 'sequelize';
-
-/**
- * The sequelize family model, so that we can create backrefs in other models.
- */
-export const family = db.define('tb_Family', {
-  id: {
-    type: Sequelize.BIGINT,
-    primaryKey: true,
-    autoIncrement: true,
-    field: 'id'
-  },
-
-  name: {
-    type: Sequelize.STRING(128),
-    allowNull: false,
-    field: 'name'
-  }
-});
 
 /**
  * The Family defines the family table within the UHRNinja database
  */
-export class Family {
+export default class Family {
 
   /**
    * Family create static function, facilitates creation of new families.
@@ -35,23 +16,8 @@ export class Family {
      })
    */
   static create(fam_obj, cb) {
-    family.create(fam_obj)
-    .then((obj) => cb(obj))
-    .catch((err) => cb(null, err));
-  }
-
-  /**
-   * Get a family by its ID.
-   * @param {object} [fam_id] - ID of the family to retrieve
-   * @param {function} [cb] - Callback function that takes two argument (obj, err)
-   * @example
-   * Family.create({
-        name: 'Smith Family'
-     })
-   */
-  static get(fam_id, cb) {
-    family.findById(fam_id)
-    .then((obj) => cb(obj))
+    new MFamily(fam_obj).save(null, {method: 'insert'})
+    .then((fam) => cb(fam.toJSON()))
     .catch((err) => cb(null, err));
   }
 }

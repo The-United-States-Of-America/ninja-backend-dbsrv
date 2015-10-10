@@ -1,23 +1,4 @@
-import db from '../Database';
-import Sequelize from 'sequelize';
-
-/**
- * The sequelize user model, so that we can create backrefs in other models.
- */
-export const user = db.define('tb_User', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-    field: 'id',
-  },
-
-  type_id: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    field: 'type_id'
-  }
-});
+import { MUser } from './models';
 
 /**
  * The UserTypes enum that corresponds to the tb_UserType in the database
@@ -40,8 +21,8 @@ export class User {
    * User.create(UserTypes.PATIENT);
    */
   static create(t_id, cb) {
-    user.create({type_id: t_id}).then(
-      (user) => cb(user)
-    );
+    new MUser({type_id: t_id}).save()
+    .then( (user) => cb(user.toJSON()) )
+    .catch( (err) => cb(null, err) );
   }
 }

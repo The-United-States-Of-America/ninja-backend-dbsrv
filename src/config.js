@@ -7,7 +7,7 @@ const config = {
       pass: 'uhrninja',
 
       port: 15432,
-      logging: false //console.log to turn on
+      logging: true //console.log to turn on
     }
   },
   production: {
