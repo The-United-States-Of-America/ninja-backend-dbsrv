@@ -31,16 +31,10 @@ export default class Client {
 
   /**
    * Get a user based on the user ID.
-   * @param {object} [clientId] - User object with the user ID.
+   * @param {number} [clientId] - User object with the user ID.
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
-   * Client.create({
-        ssn: 123456789,
-        firstName: 'Test',
-        lastName: 'User',
-        email: 'test@test.com',
-        password: 'test'
-     })
+   * Client.get(1)
    */
   static get(clientId, cb) {
     MClient.where('id', clientId).fetch({withRelated: ['family']})
