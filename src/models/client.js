@@ -8,7 +8,7 @@ export default class Client {
 
   /**
    * Create a new client after creating a new user.
-   * @param {object} [user_obj] - The JSON User Object that is destructured then stores
+   * @param {object} [user_obj] - The JSON User Object that is destructured then stored
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
    * Client.create({
@@ -30,11 +30,11 @@ export default class Client {
   }
 
   /**
-   * Get a user based on the user ID.
-   * @param {number} [clientEmail] - The user email to query.
+   * Get a user based on the user's email.
+   * @param {String} [clientEmail] - The user email to query.
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
-   * Client.get(1)
+   * Client.get('sathyp@rpi.edu')
    */
   static get(clientEmail, cb) {
     MClient.where('email', clientEmail).fetch({withRelated: ['family']})

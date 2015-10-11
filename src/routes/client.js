@@ -4,17 +4,6 @@ import FamilyRequests from '../models/familyrequests';
 import Express from 'express'
 const rtr = Express.Router();
 
-
-// rtr.post('/test', (req, res) => {
-//   TestClient.where('id', 1).fetch({withRelated: ['family.members']}).then(function(user) {
-//     console.log(user.toJSON());
-//     console.log(user.related('family').toJSON());
-//   }).catch(function(err) {
-//     console.error(err);
-//   });
-//   res.send("TEST");
-// });
-
 /**
  * ClientRoute serves all patient related endpoints.
  */

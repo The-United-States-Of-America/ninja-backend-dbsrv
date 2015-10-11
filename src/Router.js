@@ -1,6 +1,7 @@
 import ClientRoute from './routes/client';
 import FamilyRoute from './routes/family';
 import OrganizationRoute from './routes/organization';
+import ProviderRoute from './routes/provider';
 
 /**
  * The Router is responsible for aggregating all the various routing endpoints within the application, and serving them.
@@ -17,7 +18,8 @@ export default class Router {
     const routes = {
       client: new ClientRoute(),
       family: new FamilyRoute(),
-      organization: new OrganizationRoute()
+      organization: new OrganizationRoute(),
+      provider: new ProviderRoute()
     };
 
     for (let route in routes) {
