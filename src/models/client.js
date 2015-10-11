@@ -44,7 +44,7 @@ export default class Client {
 
   /**
    * Join a family.
-   * @param {object} [query_obj] - Query object that houses the client ID
+   * @param {object} [query_obj] - Query object that houses the client ID and familyID
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
    * Client.joinFamily({
@@ -57,7 +57,7 @@ export default class Client {
       id: query_obj.clientId,
       familyId: query_obj.familyId
     }).save()
-    .then((obj) => cb(obj))
+    .then((obj) => cb(obj.toJSON()))
     .catch((err) => cb(null, err));
   }
 

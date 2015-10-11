@@ -42,14 +42,14 @@ export default class FamilyRequests {
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
    * FamilyRequests.delete({
-        clientId: 1
+        clientId: 1,
+        familyId: 3
      })
    */
   static delete(query, cb) {
-    cb(null, 'Not implemented yet');
-    // familyrequests.destroy({where: {clientId: query.clientId}})
-    // .then((destroyed) => cb(destroyed))
-    // .catch((err) => cb(null, err));
+    new MFamilyRequests(query).destroy()
+    .then((destroyed) => cb(destroyed.toJSON()))
+    .catch((err) => cb(null, err));
   }
 
 }

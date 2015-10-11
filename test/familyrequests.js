@@ -39,4 +39,18 @@ describe('Family Invite Tests', () => {
     });
   });
 
+  it('should accept the invite', (done) => {
+    api.post('/client/accept_invite')
+    .set('Accept', 'application/json')
+    .send({
+      clientId: 1,
+      familyId: 1
+    })
+    .expect(400)
+    .end((err, res) => {
+      expect(parseInt(res.body.familyId)).to.equal(1);
+      done();
+    });
+  });
+
 });

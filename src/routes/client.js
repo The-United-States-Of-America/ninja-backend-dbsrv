@@ -44,23 +44,23 @@ export default class ClientRoute {
         else return res.send(fams);
       });
     });
-    //
-    // rtr.post('/accept_invite', (req, res) => {
-    //   FamilyRequests.delete(req.body, (deleted, err) => {
-    //     if(err) return res.status(400).send(err);
-    //     else Client.joinFamily(req.body, (user, err) => {
-    //       if(err) return res.status(400).send(err);
-    //       else return res.send({ accepted: deleted });
-    //     })
-    //   });
-    // });
-    //
-    // rtr.post('/reject_invite', (req, res) => {
-    //   FamilyRequests.delete(req.body, (deleted, err) => {
-    //     if(err) return res.status(400).send(err);
-    //     else return res.send({ rejected: deleted });
-    //   });
-    // });
+
+    rtr.post('/accept_invite', (req, res) => {
+      FamilyRequests.delete(req.body, (deleted, err) => {
+        if(err) return res.status(400).send(err);
+        else Client.joinFamily(req.body, (user, err) => {
+          if(err) return res.status(400).send(err);
+          else return res.send(user);
+        })
+      });
+    });
+
+    rtr.post('/reject_invite', (req, res) => {
+      FamilyRequests.delete(req.body, (deleted, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(deleted);
+      });
+    });
 
   }
 
