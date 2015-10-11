@@ -27,6 +27,10 @@ export const MClient = bookshelf.Model.extend({
 export const MProvider = bookshelf.Model.extend({
   tableName: 'tb_Provider',
 
+  specilizations: function(){
+    return this.belongsToMany(MTaxonomy).through(MRefProviderTaxonomy);
+  },
+
   user: function() {
     return this.belongsTo(MUser, 'id');
   }
@@ -68,6 +72,15 @@ export const MFamily = bookshelf.Model.extend({
 });
 
 /**
+ * Taxonomy model, houses code and metadata for taxonomy data
+ */
+export const MTaxonomy = bookshelf.Model.extend({
+  tableName: 'tb_Taxonomy',
+  idAttribute: 'code'
+});
+
+
+/**
  * Family invites relational model.
  */
 export const MFamilyRequests = bookshelf.Model.extend({
@@ -81,5 +94,22 @@ export const MFamilyRequests = bookshelf.Model.extend({
 
   family: function() {
     return this.belongsTo(MFamily, 'familyId');
+  }
+});
+
+/**
+ * Provider specilizations relational model
+ */
+export const MRefProviderTaxonomy = bookshelf.Model.extend({
+  tableName: 'tb_RefProviderTaxonomy',
+  idAttribute: 'providerId',
+  idAttributes: ['providerId', 'taxonomyCode'],
+
+  provider: function() {
+    return this.belongsTo(MProvider, 'providerId');
+  },
+
+  taxonomy: function() {
+    return this.belongsTo(MTaxonomy, 'taxonomyCode');
   }
 });

@@ -39,7 +39,7 @@ export default class Provider {
    * Provider.get('test@provider.com')
    */
   static get(provider, cb) {
-    MProvider.where('email', provider).fetch()
+    MProvider.where('email', provider).fetch({withRelated: ['specializations']})
     .then((user) => cb(user.toJSON()))
     .catch((err) => cb(null, err));
   }
