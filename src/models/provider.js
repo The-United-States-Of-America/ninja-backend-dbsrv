@@ -33,14 +33,36 @@ export default class Provider {
 
   /**
    * Get a user based on the user's email.
-   * @param {String} [provider] - The user email to query.
+   * @param {String} [providerEmail] - The user email to query.
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
    * Provider.get('test@provider.com')
    */
-  static get(provider, cb) {
-    MProvider.where('email', provider).fetch({withRelated: ['specializations']})
+  static get(providerEmail, cb) {
+    MProvider.where('email', providerEmail).fetch({withRelated: ['specializations']})
     .then((user) => cb(user.toJSON()))
+    .catch((err) => {
+      console.log(err);
+      cb(null, err)
+    });
+  }
+
+  /**
+   * Get a user based on the user's email.
+   * @param {object} [query_obj] - Object containing provider email and taxonomy code
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Provider.get('test@provider.com')
+   */
+  static assignSpecialization(query_obj, cb) {
+    MProvider.where('email', query_obj.email).fetch({withRelated: ['specializations']})
+    .then((user) => {
+      user.specializations().attach({
+        taxonomyCode: query_obj.code
+      })
+      .then((specialization) => cb(specialization.toJSON()))
+      .catch((err) => cb(null, err));
+    })
     .catch((err) => cb(null, err));
   }
 

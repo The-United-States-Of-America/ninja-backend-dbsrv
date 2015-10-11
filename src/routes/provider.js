@@ -13,6 +13,7 @@ export default class ProviderRoute {
   constructor() {
 
     rtr.get('/get/:email', (req, res) => {
+      console.log(req.params.email);
       Provider.get(req.params.email, (user, err) => {
         if(err) return res.status(400).send(err);
         else return res.send(user);
@@ -25,6 +26,13 @@ export default class ProviderRoute {
         else return res.send(user);
       });
     });
+
+    rtr.post('/assignSpecialization', (req, res) => {
+      Provider.assignSpecialization(req.body, (spec, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(spec);
+      })
+    })
 
   }
 
