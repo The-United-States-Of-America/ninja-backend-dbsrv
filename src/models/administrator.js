@@ -1,31 +1,28 @@
 import { User, UserTypes } from './user';
-import { MProvider } from './models';
+import { MAdministrator } from './models';
 
 /**
- * The Provider defines the provider table within the UHRNinja database
+ * The Administrator defines the administrator table within the UHRNinja database
  */
-export default class Provider {
+export default class Administrator {
 
   /**
-   * Create a new provider after creating a new user.
+   * Create a new administrator after creating a new user.
    * @param {object} [user_obj] - The JSON User Object that is destructured then stored
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
-   * Provider.create({
-        ssn: 123456789,
-        npi: 123456789,
+   * Administrator.create({
         firstName: 'Test',
-        lastName: 'User',
-        email: 'test@provider.com',
-        password: 'test',
-        prefix: 'Mr.'
+        lastName: 'Admin',
+        email: 'test@admin.com',
+        password: 'test'
      })
    */
   static create(user_obj, cb) {
-    User.create(UserTypes.PROVIDER, (user, err) => {
+    User.create(UserTypes.ADMINISTRATOR, (user, err) => {
       if(err) return cb(null, err);
       user_obj.id = user.id;
-      new MProvider(user_obj).save(null, {method: 'insert'})
+      new MAdministrator(user_obj).save(null, {method: 'insert'})
       .then((user) => cb(user.toJSON()))
       .catch((err) => cb(null, err));
     });
@@ -36,10 +33,10 @@ export default class Provider {
    * @param {String} [provider] - The user email to query.
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
-   * Provider.get('test@provider.com')
+   * Administrator.get('test@admin.com')
    */
   static get(provider, cb) {
-    MProvider.where('email', provider).fetch()
+    MAdministrator.where('email', provider).fetch()
     .then((user) => cb(user.toJSON()))
     .catch((err) => cb(null, err));
   }

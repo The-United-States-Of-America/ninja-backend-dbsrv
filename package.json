@@ -24,7 +24,7 @@
   "scripts": {
     "travis": "(npm start &)",
     "start": "node dist/app.js",
-    "test": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --compilers js:babel/register --colors --reporter spec test/"
+    "test": "istanbul cover node_modules/mocha/bin/_mocha tests.js --report lcovonly -- --compilers js:babel/register --colors --reporter spec test/"
   },
   "devDependencies": {
     "babel": "^5.8.23",
