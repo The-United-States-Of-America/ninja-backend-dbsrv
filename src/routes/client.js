@@ -80,7 +80,7 @@ export default class ClientRoute {
     });
 
     /**
-     * @api {get} /client/get_invtes/:client_i Get a clients invites
+     * @api {get} /client/get_invtes/:client_id Get a clients invites
      * @apiName GetInvites
      * @apiGroup Client
      *
