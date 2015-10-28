@@ -70,7 +70,7 @@ export default class ClientRoute {
      *       "password": "test"
      *     }
      * @apiSuccess {Object} result JSON Object representing the client object in the database.
-     * @apiError {String} err An error statment regarding what went wrong.
+     * @apiError {String} err An error statement regarding what went wrong.
      */
     rtr.post('/create', (req, res) => {
       Client.create(req.body, (user, err) => {
@@ -92,7 +92,7 @@ export default class ClientRoute {
      *       "name": "Test Family"
      *     }
      * @apiSuccess {Object} result JSON Object representing the invite object in the database.
-     * @apiError {String} err An error statment regarding what went wrong.
+     * @apiError {String} err An error statement regarding what went wrong.
      */
     rtr.get('/get_invites/:client_id', (req, res) => {
       FamilyRequests.get(req.params.client_id, (fams, err) => {
@@ -118,7 +118,7 @@ export default class ClientRoute {
      *       "success": true
      *     }
      * @apiSuccess {Object} result JSON Object with success as true.
-     * @apiError {String} err An error statment regarding what went wrong.
+     * @apiError {String} err An error statement regarding what went wrong.
      */
     rtr.post('/accept_invite', (req, res) => {
       FamilyRequests.delete(req.body, (deleted, err) => {
@@ -147,7 +147,7 @@ export default class ClientRoute {
      *       "success": true
      *     }
      * @apiSuccess {Object} result JSON Object with success as true.
-     * @apiError {String} err An error statment regarding what went wrong.
+     * @apiError {String} err An error statement regarding what went wrong.
      */
     rtr.post('/reject_invite', (req, res) => {
       FamilyRequests.delete(req.body, (deleted, err) => {

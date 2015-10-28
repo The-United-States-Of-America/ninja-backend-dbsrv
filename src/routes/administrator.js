@@ -66,7 +66,7 @@ export default class AdministratorRoute {
      *       "password": "test"
      *     }
      * @apiSuccess {Object} result JSON Object representing the admin object in the database.
-     * @apiError {String} err An error statment regarding what went wrong.
+     * @apiError {String} err An error statement regarding what went wrong.
      */
     rtr.post('/create', (req, res) => {
       Administrator.create(req.body, (user, err) => {

@@ -52,7 +52,10 @@ export default class Provider {
    * @param {object} [query_obj] - Object containing provider email and taxonomy code
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
-   * Provider.get('test@provider.com')
+   * Provider.assignSpecialization({
+       email: "test@provider.com",
+       code: "101YA0400X"
+     })
    */
   static assignSpecialization(query_obj, cb) {
     MProvider.where('email', query_obj.email).fetch({withRelated: ['specializations']})
@@ -60,7 +63,7 @@ export default class Provider {
       user.specializations().attach({
         taxonomyCode: query_obj.code
       })
-      .then((specialization) => cb(specialization.toJSON()))
+      .then(() => cb({success: true}))
       .catch((err) => cb(null, err));
     })
     .catch((err) => cb(null, err));
