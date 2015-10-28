@@ -26,4 +26,5 @@ To run the example, run `npm start` in the root directory. This command will run
 
 ## Documentation
 
-Please visit documentation [here](http://the-united-states-of-america.github.io/ninja-backend-dbsrv/).
+[Code](http://the-united-states-of-america.github.io/ninja-backend-dbsrv/).
+[API](http://the-united-states-of-america.github.io/ninja-backend-dbsrv/api).

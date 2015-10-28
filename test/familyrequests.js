@@ -26,11 +26,8 @@ describe('Family Invite Tests', () => {
   });
 
   it('see if user has invite', (done) => {
-    api.post('/client/get_invites')
+    api.get('/client/get_invites/1')
     .set('Accept', 'application/json')
-    .send({
-      clientId: 1
-    })
     .expect(400)
     .end((err, res) => {
       expect(parseInt(res.body.id)).to.equal(testId);
@@ -48,7 +45,7 @@ describe('Family Invite Tests', () => {
     })
     .expect(400)
     .end((err, res) => {
-      expect(parseInt(res.body.familyId)).to.equal(1);
+      expect(res.body.success).to.equal(true);
       done();
     });
   });

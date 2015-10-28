@@ -57,7 +57,7 @@ export default class Client {
       id: query_obj.clientId,
       familyId: query_obj.familyId
     }).save()
-    .then((obj) => cb(obj.toJSON()))
+    .then(() => cb({success: true}))
     .catch((err) => cb(null, err));
   }
 

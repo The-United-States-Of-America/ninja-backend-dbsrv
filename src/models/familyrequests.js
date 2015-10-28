@@ -23,15 +23,13 @@ export default class FamilyRequests {
 
   /**
    * Get all the invites for a given user.
-   * @param {object} [query] - Query object
+   * @param {number} [client_id] - The client id we want invites for
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
-   * FamilyRequests.get({
-        clientId: 1
-     })
+   * FamilyRequests.get(1)
    */
-  static get(query, cb) {
-    MFamilyRequests.where('clientId', query.clientId).fetch({withRelated: ['family']})
+  static get(client_id, cb) {
+    MFamilyRequests.where('clientId', client_id).fetch({withRelated: ['family']})
     .then((fam) => cb(fam.related('family').toJSON()))
     .catch((err) => cb(null, err));
   }
@@ -48,7 +46,7 @@ export default class FamilyRequests {
    */
   static delete(query, cb) {
     new MFamilyRequests(query).destroy()
-    .then((destroyed) => cb(destroyed.toJSON()))
+    .then(() => cb({success: true}))
     .catch((err) => cb(null, err));
   }
 

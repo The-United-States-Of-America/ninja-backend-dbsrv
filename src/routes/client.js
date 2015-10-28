@@ -53,13 +53,11 @@ export default class ClientRoute {
      * @apiParam {Object} user The user object that you want to create.
      * @apiParamExample {json} Request-Example:
      *     {
-     *       {
-     *         "ssn": 123456789,
-     *         "firstName": 'Pranav',
-     *         "lastName": 'Sathy',
-     *         "email": 'sathyp@rpi.edu',
-     *         "password": 'test'
-     *       }
+     *       "ssn": 123456789,
+     *       "firstName": 'Pranav',
+     *       "lastName": 'Sathy',
+     *       "email": 'sathyp@rpi.edu',
+     *       "password": 'test'
      *     }
      * @apiSuccessExample {json} Success-Response:
      *     HTTP/1.1 200 OK
@@ -81,13 +79,47 @@ export default class ClientRoute {
       });
     });
 
-    rtr.post('/get_invites', (req, res) => {
-      FamilyRequests.get(req.body, (fams, err) => {
+    /**
+     * @api {get} /client/get_invtes/:client_i Get a clients invites
+     * @apiName GetInvites
+     * @apiGroup Client
+     *
+     * @apiParam {Number} client_id The client ID we want invites for.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "id": "1",
+     *       "name": "Test Family"
+     *     }
+     * @apiSuccess {Object} result JSON Object representing the invite object in the database.
+     * @apiError {String} err An error statment regarding what went wrong.
+     */
+    rtr.get('/get_invites/:client_id', (req, res) => {
+      FamilyRequests.get(req.params.client_id, (fams, err) => {
         if(err) return res.status(400).send(err);
         else return res.send(fams);
       });
     });
 
+    /**
+     * @api {post} /client/get_invtes/ Accept a family invite
+     * @apiName AcceptInvites
+     * @apiGroup Client
+     *
+     * @apiParam {Object} invite An object with the client and family id.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       "clientId": 1,
+     *       "familyId": 3
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "success": true
+     *     }
+     * @apiSuccess {Object} result JSON Object with success as true.
+     * @apiError {String} err An error statment regarding what went wrong.
+     */
     rtr.post('/accept_invite', (req, res) => {
       FamilyRequests.delete(req.body, (deleted, err) => {
         if(err) return res.status(400).send(err);
@@ -98,6 +130,25 @@ export default class ClientRoute {
       });
     });
 
+    /**
+     * @api {post} /client/reject_invite/ Reject a family invite
+     * @apiName GetInvites
+     * @apiGroup Client
+     *
+     * @apiParam {Object} invite An object with the client and family id.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       "clientId": 1,
+     *       "familyId": 3
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "success": true
+     *     }
+     * @apiSuccess {Object} result JSON Object with success as true.
+     * @apiError {String} err An error statment regarding what went wrong.
+     */
     rtr.post('/reject_invite', (req, res) => {
       FamilyRequests.delete(req.body, (deleted, err) => {
         if(err) return res.status(400).send(err);
