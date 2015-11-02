@@ -1,4 +1,5 @@
 import Provider from '../models/provider';
+import OrganizationRequests from '../models/organizationrequests';
 
 import Express from 'express'
 const rtr = Express.Router();
@@ -117,7 +118,85 @@ export default class ProviderRoute {
         if(err) return res.status(400).send(err);
         else return res.send(spec);
       })
-    })
+    });
+
+    /**
+     * @api {get} /client/get_org_invtes/:provider_id Get a clients invites
+     * @apiName GetOrgInvites
+     * @apiGroup Provider
+     *
+     * @apiParam {Number} provider_id The provider ID we want invites for.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "id": "1",
+     *       "name": "Test Family"
+     *     }
+     * @apiSuccess {Object} result JSON Object representing the invite object in the database.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get('/get_org_invites/:provider_id', (req, res) => {
+      OrganizationRequests.get(req.params.provider_id, (orgs, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(orgs);
+      });
+    });
+
+
+    /**
+     * @api {post} /provider/accept_org_invite/ Accept a family invite
+     * @apiName AcceptOrgInvites
+     * @apiGroup Provider
+     *
+     * @apiParam {Object} invite An object with the user and organization id.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       "userId": 1,
+     *       "organizationId": 3
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "success": true
+     *     }
+     * @apiSuccess {Object} result JSON Object with success as true.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.post('/accept_org_invite', (req, res) => {
+      OrganizationRequests.delete(req.body, (deleted, err) => {
+        if(err) return res.status(400).send(err);
+        else Provider.joinOrganization(req.body, (user, err) => {
+          if(err) return res.status(400).send(err);
+          else return res.send(user);
+        })
+      });
+    });
+
+    /**
+     * @api {post} /client/reject_org_invite/ Reject an organization invite
+     * @apiName RejectOrgInvites
+     * @apiGroup Provider
+     *
+     * @apiParam {Object} invite An object with the user and organization id.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       "userId": 1,
+     *       "organizationId": 3
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "success": true
+     *     }
+     * @apiSuccess {Object} result JSON Object with success as true.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.post('/reject_org_invite', (req, res) => {
+      OrganizationRequests.delete(req.body, (deleted, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(deleted);
+      });
+    });
 
   }
 

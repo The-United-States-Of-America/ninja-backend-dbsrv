@@ -53,7 +53,7 @@ export default class FamilyRoute {
      * @apiSuccessExample {json} Success-Response:
      *     HTTP/1.1 200 OK
      *     {
-     *       "id": 1,
+     *       "clientId": 1,
      *       "familyId": 3
      *     }
      * @apiSuccess {Object} result JSON Object representing the invite object in the database.

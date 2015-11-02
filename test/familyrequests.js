@@ -26,7 +26,7 @@ describe('Family Invite Tests', () => {
   });
 
   it('see if user has invite', (done) => {
-    api.get('/client/get_invites/1')
+    api.get('/client/get_family_invites/1')
     .set('Accept', 'application/json')
     .expect(400)
     .end((err, res) => {
@@ -37,7 +37,7 @@ describe('Family Invite Tests', () => {
   });
 
   it('should accept the invite', (done) => {
-    api.post('/client/accept_invite')
+    api.post('/client/accept_fam_invite')
     .set('Accept', 'application/json')
     .send({
       clientId: 1,

@@ -16,6 +16,10 @@ export const MClient = bookshelf.Model.extend({
     return this.belongsTo(MFamily, 'familyId');
   },
 
+  organizations: function() {
+    return this.belongsToMany(MOrganization, 'tb_RefUserOrganization', 'userId', 'organizationId');
+  },
+
   user: function() {
     return this.belongsTo(MUser, 'id');
   }
@@ -31,6 +35,10 @@ export const MProvider = bookshelf.Model.extend({
     return this.belongsToMany(MTaxonomy, 'tb_RefProviderTaxonomy', 'providerId', 'taxonomyCode');
   },
 
+  organizations: function() {
+    return this.belongsToMany(MOrganization, 'tb_RefUserOrganization', 'userId', 'organizationId');
+  },
+
   user: function() {
     return this.belongsTo(MUser, 'id');
   }
@@ -42,7 +50,7 @@ export const MProvider = bookshelf.Model.extend({
 export const MAdministrator = bookshelf.Model.extend({
   tableName: 'tb_Administrator',
 
-  family: function() {
+  organization: function() {
     return this.belongsTo(MOrganization, 'organizationId');
   },
 
@@ -94,5 +102,22 @@ export const MFamilyRequests = bookshelf.Model.extend({
 
   family: function() {
     return this.belongsTo(MFamily, 'familyId');
+  }
+});
+
+/**
+ * Organization invites relational model.
+ */
+export const MOrganizationRequests = bookshelf.Model.extend({
+  tableName: 'tb_OrganizationRequests',
+  idAttribute: 'userId',
+  idAttributes: ['userId', 'organizationId'],
+
+  user: function() {
+    return this.belongsTo(MUser, 'userId');
+  },
+
+  organization: function() {
+    return this.belongsTo(MOrganization, 'organizationId');
   }
 });

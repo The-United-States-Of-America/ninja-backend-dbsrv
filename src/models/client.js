@@ -37,7 +37,7 @@ export default class Client {
    * Client.get('sathyp@rpi.edu')
    */
   static get(clientEmail, cb) {
-    MClient.where('email', clientEmail).fetch({withRelated: ['family']})
+    MClient.where('email', clientEmail).fetch({withRelated: ['family', 'organizations']})
     .then((user) => cb(user.toJSON()))
     .catch((err) => cb(null, err));
   }
@@ -58,6 +58,28 @@ export default class Client {
       familyId: query_obj.familyId
     }).save()
     .then(() => cb({success: true}))
+    .catch((err) => cb(null, err));
+  }
+
+  /**
+   * Let a client join an organization.
+   * @param {object} [query_obj] - Object containing userId and organizationId
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Client.joinOrganization({
+       userId: 1,
+       organizationId: 3
+     })
+   */
+  static joinOrganization(query_obj, cb) {
+    MClient.where('id', query_obj.userId).fetch({withRelated: ['organizations']})
+    .then((user) => {
+      user.organizations().attach({
+        organizationId: query_obj.organizationId
+      })
+      .then(() => cb({success: true}))
+      .catch((err) => cb(null, err));
+    })
     .catch((err) => cb(null, err));
   }
 

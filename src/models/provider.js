@@ -39,7 +39,7 @@ export default class Provider {
    * Provider.get('test@provider.com')
    */
   static get(providerEmail, cb) {
-    MProvider.where('email', providerEmail).fetch({withRelated: ['specializations']})
+    MProvider.where('email', providerEmail).fetch({withRelated: ['specializations', 'organizations']})
     .then((user) => cb(user.toJSON()))
     .catch((err) => {
       console.log(err);
@@ -48,7 +48,7 @@ export default class Provider {
   }
 
   /**
-   * Get a user based on the user's email.
+   * Assign a provider a specialty.
    * @param {object} [query_obj] - Object containing provider email and taxonomy code
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
@@ -62,6 +62,28 @@ export default class Provider {
     .then((user) => {
       user.specializations().attach({
         taxonomyCode: query_obj.code
+      })
+      .then(() => cb({success: true}))
+      .catch((err) => cb(null, err));
+    })
+    .catch((err) => cb(null, err));
+  }
+
+  /**
+   * Let a provider join an organization.
+   * @param {object} [query_obj] - Object containing userId and organizationId
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Provider.joinOrganization({
+       userId: 1,
+       organizationId: 3
+     })
+   */
+  static joinOrganization(query_obj, cb) {
+    MProvider.where('id', query_obj.userId).fetch({withRelated: ['organizations']})
+    .then((user) => {
+      user.organizations().attach({
+        organizationId: query_obj.organizationId
       })
       .then(() => cb({success: true}))
       .catch((err) => cb(null, err));

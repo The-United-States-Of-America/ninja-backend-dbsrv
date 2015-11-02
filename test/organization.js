@@ -7,8 +7,6 @@ const should = chai.should(),
       api = supertest('http://localhost:' + config.port);
 
 describe('Organization Tests', () => {
-  let testId = 0;
-
   it('should create a new organization', (done) => {
     api.post('/organization/create')
     .set('Accept', 'application/json')
@@ -21,7 +19,6 @@ describe('Organization Tests', () => {
     })
     .expect(200)
     .end((err, res) => {
-      testId = res.body.id;
       expect(res.body.name).to.equal('Primary Provider');
       done();
     });
