@@ -8,3 +8,4 @@ import './test/provider';
 import './test/administrator';
 import './test/specializations';
 import './test/organizationrequests';
+import './test/appointments';

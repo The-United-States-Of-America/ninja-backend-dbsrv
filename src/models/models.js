@@ -121,3 +121,20 @@ export const MOrganizationRequests = bookshelf.Model.extend({
     return this.belongsTo(MOrganization, 'organizationId');
   }
 });
+
+/**
+ * Appointments relational model.
+ */
+export const MAppointments = bookshelf.Model.extend({
+  tableName: 'tb_Appointments',
+  idAttribute: 'clientId',
+  idAttributes: ['clientId', 'providerId', 'dateRequested'],
+
+  client: function() {
+    return this.belongsTo(MClient, 'clientId');
+  },
+
+  provider: function() {
+    return this.belongsTo(MProvider, 'providerId');
+  }
+});

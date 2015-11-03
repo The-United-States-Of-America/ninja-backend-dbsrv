@@ -3,6 +3,7 @@ import FamilyRoute from './routes/family';
 import OrganizationRoute from './routes/organization';
 import ProviderRoute from './routes/provider';
 import AdministratorRoute from './routes/administrator';
+import AppointmentsRoute from './routes/appointments';
 
 /**
  * The Router is responsible for aggregating all the various routing endpoints within the application, and serving them.
@@ -21,7 +22,8 @@ export default class Router {
       family: new FamilyRoute(),
       organization: new OrganizationRoute(),
       provider: new ProviderRoute(),
-      admin: new AdministratorRoute()
+      admin: new AdministratorRoute(),
+      appt: new AppointmentsRoute()
     };
 
     for (let route in routes) {
