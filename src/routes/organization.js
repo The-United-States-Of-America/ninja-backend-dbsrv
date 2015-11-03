@@ -74,6 +74,22 @@ export default class OrganizationRoute {
       });
     });
 
+    /**
+     * @api {get} /organization/providers/:org_id Get all doctors in an organization
+     * @apiName GetDoctors
+     * @apiGroup Organization
+     *
+     * @apiParam {number} org_id The organization ID to get doctors for
+     * @apiSuccess {Object} result JSON Object with array of doctors.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get('/providers/:org_id', (req, res) => {
+      Organization.get_providers(req.params.org_id, (providers, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(providers);
+      });
+    });
+
   }
 
   /**

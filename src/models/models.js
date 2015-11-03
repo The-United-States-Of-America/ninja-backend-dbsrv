@@ -66,6 +66,10 @@ export const MOrganization = bookshelf.Model.extend({
   tableName: 'tb_Organization',
   admins: function() {
     return this.hasMany(MAdministrator, 'organizationId');
+  },
+
+  providers: function() {
+    return this.belongsToMany(MProvider, 'tb_RefUserOrganization', 'organizationId', 'userId');
   }
 });
 

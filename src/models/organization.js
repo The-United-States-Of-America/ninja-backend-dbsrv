@@ -24,4 +24,17 @@ export default class Organization {
     .then((org) => cb(org.toJSON()))
     .catch((err) => cb(null, err));
   }
+
+  /**
+   * Get all the doctors in a given organization
+   * @param {number} [org_id] - Get all the doctors within an organization
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Organization.get_doctors(org_id)
+   */
+  static get_providers(org_id, cb) {
+    MOrganization.where('id', org_id).fetch({withRelated: ['providers']})
+    .then((org) => cb(org.related('providers').toJSON()))
+    .catch((err) => cb(null, err));
+  }
 }
