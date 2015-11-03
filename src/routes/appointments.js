@@ -34,7 +34,7 @@ export default class AppointmentRoute {
     });
 
     /**
-     * @api {post} /appt/update/ Create New Appointment
+     * @api {post} /appt/update/ Update An Appointment
      * @apiName UpdateAppointment
      * @apiGroup Appointments
      *
