@@ -52,4 +52,30 @@ export default class AppointmentsRoute {
     .then( (appt) => cb(appt.toJSON()) )
     .catch( (err) => cb(null, err) );
   }
+
+  /**
+   * Get all appointments for a client.
+   * @param {number} client_id - The client id we want appointments for
+   * @param {function} cb - Callback function that takes one argument (user)
+   * @example
+   * Appointments.client_appointments(1);
+   */
+  static client_appointments(client_id, cb) {
+    MAppointments.where('clientId', client_id).fetchAll({withRelated: ['provider']})
+    .then( (appts) => cb(appts.toJSON()) )
+    .catch( (err) => cb(null, err) );
+  }
+
+  /**
+   * Get all appointments for a provider.
+   * @param {number} provider_id - The provider id we want appointments for
+   * @param {function} cb - Callback function that takes one argument (user)
+   * @example
+   * Appointments.provider_appointments(3);
+   */
+  static provider_appointments(provider_id, cb) {
+    MAppointments.where('providerId', provider_id).fetchAll({withRelated: ['client']})
+    .then( (appts) => cb(appts.toJSON()) )
+    .catch( (err) => cb(null, err) );
+  }
 }

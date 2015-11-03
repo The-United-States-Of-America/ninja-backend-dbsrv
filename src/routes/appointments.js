@@ -51,6 +51,37 @@ export default class AppointmentRoute {
       });
     });
 
+    /**
+     * @api {get} /appt/client/:id Get appointments for a client
+     * @apiName GetClientAppts
+     * @apiGroup Appointments
+     *
+     * @apiParam {number} id Id of the client we want appointments for
+     * @apiSuccess {Object} result JSON object with all appointments.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get('/client/:id', (req, res) => {
+      Appointments.client_appointments(req.params.id, (fam, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(fam);
+      });
+    });
+
+    /**
+     * @api {get} /appt/provider/:id Get appointments for a provider
+     * @apiName GetProviderAppts
+     * @apiGroup Appointments
+     *
+     * @apiParam {number} id Id of the provider we want appointments for
+     * @apiSuccess {Object} result JSON object with all appointments.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get('/provider/:id', (req, res) => {
+      Appointments.provider_appointments(req.params.id, (fam, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(fam);
+      });
+    });
 
   }
 
