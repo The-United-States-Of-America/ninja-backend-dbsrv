@@ -81,7 +81,7 @@ export default class ClientRoute {
     });
 
     /**
-     * @api {get} /client/get_family_invtes/:client_id Get a clients invites
+     * @api {get} /client/get_family_invtes/:client_id Get Family Invites
      * @apiName GetFamilyInvites
      * @apiGroup Client
      *
@@ -103,7 +103,7 @@ export default class ClientRoute {
     });
 
     /**
-     * @api {get} /client/get_org_invtes/:client_id Get a clients invites
+     * @api {get} /client/get_org_invtes/:client_id Get Organization Invites
      * @apiName GetOrgInvites
      * @apiGroup Client
      *
@@ -154,7 +154,7 @@ export default class ClientRoute {
     });
 
     /**
-     * @api {post} /client/accept_org_invite/ Accept a family invite
+     * @api {post} /client/accept_org_invite/ Accept an organization invite
      * @apiName AcceptOrgInvites
      * @apiGroup Client
      *
