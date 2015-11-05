@@ -121,7 +121,7 @@ export default class ProviderRoute {
     });
 
     /**
-     * @api {get} /client/get_org_invtes/:provider_id Get a clients invites
+     * @api {get} /provider/get_org_invtes/:provider_id Get a providers invites
      * @apiName GetOrgInvites
      * @apiGroup Provider
      *
@@ -173,7 +173,7 @@ export default class ProviderRoute {
     });
 
     /**
-     * @api {post} /client/reject_org_invite/ Reject an organization invite
+     * @api {post} /provider/reject_org_invite/ Reject an organization invite
      * @apiName RejectOrgInvites
      * @apiGroup Provider
      *
