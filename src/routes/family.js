@@ -40,6 +40,22 @@ export default class FamilyRoute {
     });
 
     /**
+     * @api {get} /family/getMembers/:id Get Family
+     * @apiName GetMembers
+     * @apiGroup Family
+     *
+     * @apiParam {Number} id The family ID
+     * @apiSuccess {Object} result JSON Object representing the clients.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get('/getMembers/:id', (req, res) => {
+      Family.getMembers(req.params.id, (members, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(members);
+      });
+    });
+
+    /**
      * @api {post} /family/invite/ Invite a user to a family
      * @apiName InviteFamily
      * @apiGroup Family

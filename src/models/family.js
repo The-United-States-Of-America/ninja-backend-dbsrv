@@ -20,4 +20,17 @@ export default class Family {
     .then((fam) => cb(fam.toJSON()))
     .catch((err) => cb(null, err));
   }
+
+  /**
+   * Get all the family members
+   * @param {Number} [id] - The family id.
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Family.getMembers(1)
+   */
+  static getMembers(id, cb) {
+    MFamily.where('id', id).fetch({withRelated: ['members']})
+    .then((fam) => cb(fam.related('members').toJSON()))
+    .catch((err) => cb(null, err));
+  }
 }
