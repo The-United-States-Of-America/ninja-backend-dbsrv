@@ -27,12 +27,14 @@ export default class FileRoute {
      */
     rtr.post('/upload/:id', multer({ dest: './files/'}).single('doc'), (req, res) => {
       fs.readFile(process.cwd() + '/files/' + req.file.filename, function (err, data) {
+        if(err) res.status(500).send(err);
         try {
           fs.mkdirSync(process.cwd() + '/files/' + req.params.id);
         } catch(e) {}
 
         var newPath = process.cwd() + "/files/" + req.params.id + "/" + req.file.originalname;
         fs.writeFile(newPath, data, function (err) {
+          if(err) res.status(500).send(err);
           fs.unlinkSync(process.cwd() + '/files/' + req.file.filename);
           res.send({success: true});
         });
