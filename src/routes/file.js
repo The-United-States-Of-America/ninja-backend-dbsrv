@@ -25,6 +25,7 @@ export default class FileRoute {
      * @apiError {String} err An error statement regarding what went wrong.
      */
     rtr.post('/upload', (req, res) => {
+      console.log(req.files)
       for (let appt_id in req.files) {
         fs.readFile(req.files[appt_id].path, function (err, data) {
           console.log(err);
