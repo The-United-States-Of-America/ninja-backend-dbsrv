@@ -90,6 +90,22 @@ export default class OrganizationRoute {
       });
     });
 
+    /**
+     * @api {get} /organization/get/:org_id Get all people in an organization
+     * @apiName GetPeople
+     * @apiGroup Organization
+     *
+     * @apiParam {number} org_id The organization ID to get people for
+     * @apiSuccess {Object} result JSON Object with the whole.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get('/get/:org_id', (req, res) => {
+      Organization.get_all(req.params.org_id, (org, err) => {
+        if(err) return res.status(400).send(err);
+        else return res.send(org);
+      });
+    });
+
   }
 
   /**

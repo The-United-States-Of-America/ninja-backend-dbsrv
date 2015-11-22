@@ -70,6 +70,10 @@ export const MOrganization = bookshelf.Model.extend({
 
   providers: function() {
     return this.belongsToMany(MProvider, 'tb_RefUserOrganization', 'organizationId', 'userId');
+  },
+
+  clients: function() {
+    return this.belongsToMany(MClient, 'tb_RefUserOrganization', 'organizationId', 'userId');
   }
 });
 

@@ -30,11 +30,24 @@ export default class Organization {
    * @param {number} [org_id] - Get all the doctors within an organization
    * @param {function} [cb] - Callback function that takes two argument (obj, err)
    * @example
-   * Organization.get_doctors(org_id)
+   * Organization.get_providers(org_id)
    */
   static get_providers(org_id, cb) {
     MOrganization.where('id', org_id).fetch({withRelated: ['providers']})
     .then((org) => cb(org.related('providers').toJSON()))
+    .catch((err) => cb(null, err));
+  }
+
+  /**
+   * Get all the people in a given organization
+   * @param {number} [org_id] - Get all the people within an organization
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Organization.get_all(org_id)
+   */
+  static get_all(org_id, cb) {
+    MOrganization.where('id', org_id).fetch({withRelated: ['providers', 'clients', 'admins']})
+    .then((org) => cb(org.toJSON()))
     .catch((err) => cb(null, err));
   }
 }
