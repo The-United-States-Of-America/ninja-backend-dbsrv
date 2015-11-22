@@ -1,5 +1,5 @@
 import { MAppointments } from './models';
-
+import Bookshelf from '../Database.js';
 // /**
 //  * The AppointmentTypes enum that corresponds to the tb_UserType in the database
 //  */
@@ -61,8 +61,22 @@ export default class AppointmentsRoute {
    * Appointments.client_appointments(1);
    */
   static client_appointments(client_id, cb) {
-    MAppointments.where('clientId', client_id).fetchAll({withRelated: ['provider']})
-    .then( (appts) => cb(appts.toJSON()) )
+    // new MAppointments().where('clientId', client_id).fetchAll({withRelated: ['provider']})
+    // .then( (appts) => {
+    //   console.log(appts)
+    //   cb(appts.toJSON())
+    // })
+    // .catch( (err) => cb(null, err) );
+    Bookshelf.knex.raw('SELECT * from "tb_Appointments" WHERE "clientId" = \'' + client_id + '\'').then((appts) => {
+      var ret = []
+      for(let i = 0; i < appts.rows.length; i++) {
+        Bookshelf.knex.raw('SELECT * from "tb_Provider" WHERE "id" = \'' + appts.rows[i].providerId + '\'').then((provider) => {
+          appts.rows[i].provider = provider.rows[0]
+          ret.push(appts.rows[i]);
+          if(i == appts.rows.length - 1) cb(ret);
+        });
+      }
+    })
     .catch( (err) => cb(null, err) );
   }
 
@@ -74,8 +88,19 @@ export default class AppointmentsRoute {
    * Appointments.provider_appointments(3);
    */
   static provider_appointments(provider_id, cb) {
-    MAppointments.where('providerId', provider_id).fetchAll({withRelated: ['client']})
-    .then( (appts) => cb(appts.toJSON()) )
+    // new MAppointments().where('providerId', provider_id).fetchAll({withRelated: ['client']})
+    // .then( (appts) => cb(appts.toJSON()) )
+    // .catch( (err) => cb(null, err) );
+    Bookshelf.knex.raw('SELECT * from "tb_Appointments" WHERE "providerId" = \'' + provider_id + '\'').then((appts) => {
+      var ret = []
+      for(let i = 0; i < appts.rows.length; i++) {
+        Bookshelf.knex.raw('SELECT * from "tb_Client" WHERE "id" = \'' + appts.rows[i].clientId + '\'').then((client) => {
+          appts.rows[i].client = client.rows[0]
+          ret.push(appts.rows[i]);
+          if(i == appts.rows.length - 1) cb(ret);
+        });
+      }
+    })
     .catch( (err) => cb(null, err) );
   }
 }
