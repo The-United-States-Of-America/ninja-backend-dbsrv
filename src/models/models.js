@@ -135,8 +135,8 @@ export const MOrganizationRequests = bookshelf.Model.extend({
  */
 export const MAppointments = bookshelf.Model.extend({
   tableName: 'tb_Appointments',
-  idAttribute: 'clientId',
-  idAttributes: ['clientId', 'providerId', 'dateRequested'],
+  idAttribute: 'id',
+  idAttributes: ['id'],
 
   client: function() {
     return this.belongsTo(MClient, 'clientId');
