@@ -38,7 +38,7 @@ export default class AppointmentsRoute {
    * @param {object} update_obj - The fields we want to update on the given model
    * @param {function} cb - Callback function that takes one argument (user)
    * @example
-   * Appointments.create({
+   * Appointments.update({
        clientId: 1,
        providerId: 3,
        dateRequested: 2015-02-11

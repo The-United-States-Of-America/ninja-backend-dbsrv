@@ -4,6 +4,7 @@ import OrganizationRoute from './routes/organization';
 import ProviderRoute from './routes/provider';
 import AdministratorRoute from './routes/administrator';
 import AppointmentsRoute from './routes/appointments';
+import FileRoute from './routes/file';
 
 /**
  * The Router is responsible for aggregating all the various routing endpoints within the application, and serving them.
@@ -23,7 +24,8 @@ export default class Router {
       organization: new OrganizationRoute(),
       provider: new ProviderRoute(),
       admin: new AdministratorRoute(),
-      appt: new AppointmentsRoute()
+      appt: new AppointmentsRoute(),
+      file: new FileRoute()
     };
 
     for (let route in routes) {
