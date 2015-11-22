@@ -48,23 +48,9 @@ export default class AppointmentsRoute {
      });
    */
   static update(query_obj, update_obj, cb) {
-    // new MAppointments(query_obj).save(update_obj)
-    // .then( (appt) => cb(appt.toJSON()) )
-    // .catch( (err) => cb(null, err) );
-   MAppointments.forge(query_obj)
-   .fetch({require: true})
-   .then(function (appt) {
-     appt.save(update_obj)
-     .then(function (appt) {
-       cb(appt.toJSON())
-     })
-     .catch(function (err) {
-       cb(null, err) ;
-     });
-   })
-   .catch(function (err) {
-     cb(null, err) ;
-   });
+    new MAppointments(query_obj).save(update_obj, {method: 'update'})
+    .then( (appt) => cb(appt.toJSON()) )
+    .catch( (err) => cb(null, err) );
   }
 
   /**
