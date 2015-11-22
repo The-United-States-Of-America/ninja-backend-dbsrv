@@ -28,18 +28,18 @@ export default class FileRoute {
     rtr.post('/upload/:id', multer({ dest: './files/'}).single('doc'), (req, res) => {
       // console.log(req.files)
       // for (let appt_id in req.files) {
-      //   fs.readFile(req.files[appt_id].path, function (err, data) {
-      //     console.log(err);
-      //     var newPath = process.cwd() + "/files/" + appt_id + "/" + req.files[appt_id].name;
-      //     fs.writeFile(newPath, data, function (err) {
-      //       console.log(err);
-      //       res.send({success: true});
-      //     });
-      //   });
+      fs.readFile(process.cwd() + '/files/' + req.file.filename, function (err, data) {
+        console.log(err);
+        var newPath = process.cwd() + "/files/" + req.params.id + "/" + req.file.originalname;
+        fs.writeFile(newPath, data, function (err) {
+          console.log(err);
+          res.send({success: true});
+        });
+      });
       // }
-      console.log(req.body); //form fields
-    	console.log(req.file); //form files
-      res.send({success: true})
+      // console.log(req.body); //form fields
+    	// console.log(req.file); //form files
+      // res.send({success: false})
     });
 
     rtr.get('/list/:id', (req, res) => {
