@@ -28,7 +28,7 @@ export default class FileRoute {
       for (let appt_id in req.files) {
         fs.readFile(req.files[appt_id].path, function (err, data) {
           console.log(err);
-          var newPath = __dirname + "/files/" + appt_id + "/" + req.files[appt_id].name;
+          var newPath = process.cwd() + "/files/" + appt_id + "/" + req.files[appt_id].name;
           fs.writeFile(newPath, data, function (err) {
             console.log(err);
             res.send({success: true});
@@ -38,13 +38,13 @@ export default class FileRoute {
     });
 
     rtr.get('/list/:id', (req, res) => {
-      fs.readdir(__dirname + "/files/" + req.params.id, function(err, items) {
+      fs.readdir(process.cwd() + "/files/" + req.params.id, function(err, items) {
           res.send(items);
       });
     });
 
     rtr.get('/get/:id/:name', (req, res) => {
-      res.download(__dirname + "/files/" + req.params.id + "/" + req.params.name)
+      res.download(process.cwd() + "/files/" + req.params.id + "/" + req.params.name)
     })
 
   }

@@ -72,6 +72,7 @@ ALTER TABLE "tb_Administrator" OWNER TO uhrninja;
 --
 
 CREATE TABLE "tb_Appointments" (
+    id SERIAL NOT NULL,
     "clientId" bigint NOT NULL,
     "providerId" bigint NOT NULL,
     "dateRequested" timestamp with time zone DEFAULT now() NOT NULL,
