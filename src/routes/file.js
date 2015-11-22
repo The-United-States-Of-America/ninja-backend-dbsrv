@@ -26,28 +26,23 @@ export default class FileRoute {
      * @apiError {String} err An error statement regarding what went wrong.
      */
     rtr.post('/upload/:id', multer({ dest: './files/'}).single('doc'), (req, res) => {
-      // console.log(req.files)
-      // for (let appt_id in req.files) {
       fs.readFile(process.cwd() + '/files/' + req.file.filename, function (err, data) {
-        console.log(err);
         try {
           fs.mkdirSync(process.cwd() + '/files/' + req.params.id);
         } catch(e) {}
 
         var newPath = process.cwd() + "/files/" + req.params.id + "/" + req.file.originalname;
         fs.writeFile(newPath, data, function (err) {
-          console.log(err);
           fs.unlinkSync(process.cwd() + '/files/' + req.file.filename);
           res.send({success: true});
         });
       });
-      // }
-      // console.log(req.body); //form fields
-    	// console.log(req.file); //form files
-      // res.send({success: false})
     });
 
     rtr.get('/list/:id', (req, res) => {
+      try {
+        fs.mkdirSync(process.cwd() + '/files/' + req.params.id);
+      } catch(e) {}
       fs.readdir(process.cwd() + "/files/" + req.params.id, function(err, items) {
           res.send(items);
       });
