@@ -30,6 +30,7 @@ export default class FileRoute {
       // for (let appt_id in req.files) {
       fs.readFile(process.cwd() + '/files/' + req.file.filename, function (err, data) {
         console.log(err);
+        fs.mkdirSync(process.cwd() + '/files/' + req.params.id)
         var newPath = process.cwd() + "/files/" + req.params.id + "/" + req.file.originalname;
         fs.writeFile(newPath, data, function (err) {
           console.log(err);
