@@ -76,6 +76,7 @@ export default class AppointmentsRoute {
           if(i == appts.rows.length - 1) cb(ret);
         });
       }
+      cb(ret);
     })
     .catch( (err) => cb(null, err) );
   }
@@ -100,6 +101,7 @@ export default class AppointmentsRoute {
           if(i == appts.rows.length - 1) cb(ret);
         });
       }
+      cb(ret);
     })
     .catch( (err) => cb(null, err) );
   }
