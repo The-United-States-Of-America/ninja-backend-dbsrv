@@ -73,10 +73,10 @@ export default class AppointmentsRoute {
         Bookshelf.knex.raw('SELECT * from "tb_Provider" WHERE "id" = \'' + appts.rows[i].providerId + '\'').then((provider) => {
           appts.rows[i].provider = provider.rows[0]
           ret.push(appts.rows[i]);
-          // if(i == appts.rows.length - 1) cb(ret);
+          if(i == appts.rows.length - 1) cb(ret);
         });
       }
-      cb(ret);
+      if(appts.rows.length === 0) cb(ret);
     })
     .catch( (err) => cb(null, err) );
   }
@@ -98,10 +98,10 @@ export default class AppointmentsRoute {
         Bookshelf.knex.raw('SELECT * from "tb_Client" WHERE "id" = \'' + appts.rows[i].clientId + '\'').then((client) => {
           appts.rows[i].client = client.rows[0]
           ret.push(appts.rows[i]);
-          // if(i == appts.rows.length - 1) cb(ret);
+          if(i == appts.rows.length - 1) cb(ret);
         });
       }
-      cb(ret);
+      if(appts.rows.length === 0) cb(ret);
     })
     .catch( (err) => cb(null, err) );
   }
