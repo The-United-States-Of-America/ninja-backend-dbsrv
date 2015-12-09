@@ -6,7 +6,7 @@ const config = {
       user: 'uhrninja',
       pass: 'uhrninja',
 
-      port: 15432,
+      port: 5432,
       logging: false //console.log to turn on
     }
   },
