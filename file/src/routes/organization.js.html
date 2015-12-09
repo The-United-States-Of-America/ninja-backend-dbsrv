@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/routes/organization.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+</head>
+<body class="layout-container">
+
+<header>
+  <a href="./">Home</a>
+  <a href="identifiers.html">Identifier</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/The-United-States-Of-America/ninja-backend-dbsrv" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div data-ice="classWrap">
+  <h2>Class</h2>
+  <ul>
+    
+  <li data-ice="classDoc"><span><a href="class/src/models/administrator.js~Administrator.html">Administrator</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/administrator.js~AdministratorRoute.html">AdministratorRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/appointments.js~AppointmentRoute.html">AppointmentRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/appointments.js~AppointmentsRoute.html">AppointmentsRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/client.js~Client.html">Client</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/client.js~ClientRoute.html">ClientRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/family.js~Family.html">Family</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/familyrequests.js~FamilyRequests.html">FamilyRequests</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/family.js~FamilyRoute.html">FamilyRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/file.js~FileRoute.html">FileRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/organization.js~Organization.html">Organization</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/organizationrequests.js~OrganizationRequests.html">OrganizationRequests</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/organization.js~OrganizationRoute.html">OrganizationRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/provider.js~Provider.html">Provider</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/provider.js~ProviderRoute.html">ProviderRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/Router.js~Router.html">Router</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/user.js~User.html">User</a></span></li>
+</ul>
+</div>
+
+
+
+
+
+<div data-ice="variableWrap">
+  <h2><a href="variable/">Variable</a></h2>
+  <ul>
+    
+  <li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MAdministrator">MAdministrator</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MAppointments">MAppointments</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MClient">MClient</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MFamily">MFamily</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MFamilyRequests">MFamilyRequests</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MOrganization">MOrganization</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MOrganizationRequests">MOrganizationRequests</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MProvider">MProvider</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MTaxonomy">MTaxonomy</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MUser">MUser</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-UserTypes">UserTypes</a></span></li>
+</ul>
+</div>
+
+
+
+
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/routes/organization.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Organization from &apos;../models/organization&apos;;
+import OrganizationRequests from &apos;../models/organizationrequests&apos;
+import Express from &apos;express&apos;
+
+const rtr = Express.Router();
+
+/**
+ * OrganizationRoute serves all organization related endpoints.
+ */
+export default class OrganizationRoute {
+  /**
+   * Place all routes inside the constructor, so that they will be built.
+   */
+  constructor() {
+
+    /**
+     * @api {post} /organization/create/ Create New Organization
+     * @apiName CreateOrganization
+     * @apiGroup Organization
+     *
+     * @apiParam {Object} org The org object that you want to create.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       &quot;name&quot;: &apos;Primary Health Care&apos;,
+     *       &quot;state&quot;: &apos;NY&apos;,
+     *       &quot;address&quot;: &apos;123 Test Lane&apos;,
+     *       &quot;zip&quot;: &apos;12345&apos;,
+     *       &quot;phone&quot;: &quot;1234567890&quot;
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;id&quot;: 1,
+     *       &quot;name&quot;: &apos;Primary Health Care&apos;,
+     *       &quot;state&quot;: &apos;NY&apos;,
+     *       &quot;address&quot;: &apos;123 Test Lane&apos;,
+     *       &quot;zip&quot;: &apos;12345&apos;,
+     *       &quot;phone&quot;: &quot;1234567890&quot;
+     *     }
+     * @apiSuccess {Object} result JSON Object representing the organization object in the database.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.post(&apos;/create&apos;, (req, res) =&gt; {
+      Organization.create(req.body, (org, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(org);
+      });
+    });
+
+    /**
+     * @api {post} /organization/invite/ Invite a user to an organization
+     * @apiName InviteOrganization
+     * @apiGroup Organization
+     *
+     * @apiParam {Object} invite The user id and organization id to send invites for.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       &quot;userId&quot;: 1,
+     *       &quot;organizationId&quot;: 3
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;userId&quot;: 1,
+     *       &quot;organizationId&quot;: 3
+     *     }
+     * @apiSuccess {Object} result JSON Object representing the invite object in the database.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.post(&apos;/invite&apos;, (req, res) =&gt; {
+      OrganizationRequests.create(req.body, (invite, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(invite);
+      });
+    });
+
+    /**
+     * @api {get} /organization/providers/:org_id Get all doctors in an organization
+     * @apiName GetDoctors
+     * @apiGroup Organization
+     *
+     * @apiParam {number} org_id The organization ID to get doctors for
+     * @apiSuccess {Object} result JSON Object with array of doctors.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get(&apos;/providers/:org_id&apos;, (req, res) =&gt; {
+      Organization.get_providers(req.params.org_id, (providers, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(providers);
+      });
+    });
+
+    /**
+     * @api {get} /organization/get/:org_id Get all people in an organization
+     * @apiName GetPeople
+     * @apiGroup Organization
+     *
+     * @apiParam {number} org_id The organization ID to get people for
+     * @apiSuccess {Object} result JSON Object with the whole.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get(&apos;/get/:org_id&apos;, (req, res) =&gt; {
+      Organization.get_all(req.params.org_id, (org, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(org);
+      });
+    });
+
+  }
+
+  /**
+   * Get the router instance for this class
+   */
+  router() { return rtr; }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.2.6)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

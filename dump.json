@@ -1,0 +1,2799 @@
+[
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/Database.js",
+    "memberof": null,
+    "longname": "src/Database.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import knex from 'knex';\nimport bookshelf from 'bookshelf';\n\nimport config from './config';\n\nvar conn = knex({\n  client: 'pg',\n  connection: {\n    host     : '127.0.0.1',\n    port     : config.database.port,\n    user     : config.database.user,\n    password : config.database.pass,\n    database : config.database.name,\n    charset  : 'utf8'\n  },\n  pool: {\n    min: 0,\n    max: 1\n  }\n});\n\nif(config.database.logging) conn.on('query', (query) => console.log(query));\n\nexport default bookshelf(conn);\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "conn",
+    "memberof": "src/Database.js",
+    "longname": "src/Database.js~conn",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/Database.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 6,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/Router.js",
+    "memberof": null,
+    "longname": "src/Router.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import ClientRoute from './routes/client';\nimport FamilyRoute from './routes/family';\nimport OrganizationRoute from './routes/organization';\nimport ProviderRoute from './routes/provider';\nimport AdministratorRoute from './routes/administrator';\nimport AppointmentsRoute from './routes/appointments';\nimport FileRoute from './routes/file';\n\n/**\n * The Router is responsible for aggregating all the various routing endpoints within the application, and serving them.\n * @example <caption>Use only once</caption>\n * new Router(app);\n */\nexport default class Router {\n  /**\n   * The constructor injects routes into the Express application passed in.\n   * @param {express()} app An express application, used to setup routing.\n   */\n  constructor(app) {\n    // Define routes here\n    const routes = {\n      client: new ClientRoute(),\n      family: new FamilyRoute(),\n      organization: new OrganizationRoute(),\n      provider: new ProviderRoute(),\n      admin: new AdministratorRoute(),\n      appt: new AppointmentsRoute(),\n      file: new FileRoute()\n    };\n\n    for (let route in routes) {\n      app.use('/' + route, routes[route].router());\n    }\n  }\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Router",
+    "memberof": "src/Router.js",
+    "longname": "src/Router.js~Router",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/Router.js",
+    "importStyle": "Router",
+    "description": "The Router is responsible for aggregating all the various routing endpoints within the application, and serving them.",
+    "examples": [
+      "<caption>Use only once</caption>\nnew Router(app);"
+    ],
+    "lineNumber": 14,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/Router.js~Router",
+    "longname": "src/Router.js~Router#constructor",
+    "access": null,
+    "description": "The constructor injects routes into the Express application passed in.",
+    "lineNumber": 19,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "express()"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "app",
+        "description": "An express application, used to setup routing."
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/app.js",
+    "memberof": null,
+    "longname": "src/app.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Router from './Router';\n\nimport cluster from 'cluster';\nimport os from 'os';\n\nimport express from 'express';\nimport cors from 'cors';\nimport bodyParser from 'body-parser';\nimport config from './config';\n\nif (cluster.isMaster && !module.parent) {\n  const exemptCores = 0;\n  const cpuCount = os.cpus().length;\n\n  for (let i = 1; i <= cpuCount - exemptCores; i++) {\n    cluster.fork(i);\n  }\n\n  cluster.on('exit', () => cluster.fork());\n} else {\n  const app = express();\n  app.use(bodyParser.json());\n  app.use(cors());\n\n  // Setup our Router\n  new Router(app);\n\n  let server = app.listen(config.port);\n\n  // Export our server, so Mocha can start and stop it.\n  if(module.parent) module.exports = server;\n}\n"
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/config.js",
+    "memberof": null,
+    "longname": "src/config.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "const config = {\n  development: {\n    port: 8000,\n    database: {\n      name: 'ninja_db',\n      user: 'uhrninja',\n      pass: 'uhrninja',\n\n      port: 5432,\n      logging: false //console.log to turn on\n    }\n  },\n  production: {\n    port: process.env.PORT,\n    database: {\n      name: process.env.DB_NAME,\n      user: process.env.DB_USER,\n      pass: process.env.DB_PASS,\n\n      port: process.env.DB_PORT,\n      logging: false\n    }\n  },\n  travis: {\n    port: 3000,\n    database: {\n      name: 'ninja_db',\n      user: 'postgres',\n      pass: '',\n\n      port: 5432,\n      logging: false\n    }\n  }\n};\n\n/**\n * Export our configuration for the environment based on environment variable\n * NODE_ENV\n */\nexport default config[process.env.NODE_ENV || 'development'];\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "config",
+    "memberof": "src/config.js",
+    "longname": "src/config.js~config",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/config.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 1,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/administrator.js",
+    "memberof": null,
+    "longname": "src/models/administrator.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { User, UserTypes } from './user';\nimport { MAdministrator } from './models';\n\n/**\n * The Administrator defines the administrator table within the UHRNinja database\n */\nexport default class Administrator {\n\n  /**\n   * Create a new administrator after creating a new user.\n   * @param {object} [user_obj] - The JSON User Object that is destructured then stored\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Administrator.create({\n        firstName: 'Test',\n        lastName: 'Admin',\n        email: 'test@admin.com',\n        password: 'test'\n     })\n   */\n  static create(user_obj, cb) {\n    User.create(UserTypes.ADMINISTRATOR, (user, err) => {\n      if(err) return cb(null, err);\n      user_obj.id = user.id;\n      new MAdministrator(user_obj).save(null, {method: 'insert'})\n      .then((user) => cb(user.toJSON()))\n      .catch((err) => cb(null, err));\n    });\n  }\n\n  /**\n   * Get a user based on the user's email.\n   * @param {String} [provider] - The user email to query.\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Administrator.get('test@admin.com')\n   */\n  static get(provider, cb) {\n    MAdministrator.where('email', provider).fetch({withRelated: ['organization']})\n    .then((user) => cb(user.toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Let a client join an organization.\n   * @param {object} [query_obj] - Object containing userId and organizationId\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Client.joinOrganization({\n       userId: 1,\n       organizationId: 3\n     })\n   */\n  static joinOrganization(query_obj, cb) {\n    new MAdministrator({\n      id: query_obj.userId,\n      organizationId: query_obj.organizationId\n    }).save()\n    .then(() => cb({success: true}))\n    .catch((err) => cb(null, err));\n  }\n\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Administrator",
+    "memberof": "src/models/administrator.js",
+    "longname": "src/models/administrator.js~Administrator",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/administrator.js",
+    "importStyle": "Administrator",
+    "description": "The Administrator defines the administrator table within the UHRNinja database",
+    "lineNumber": 7,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/administrator.js~Administrator",
+    "longname": "src/models/administrator.js~Administrator.create",
+    "access": null,
+    "description": "Create a new administrator after creating a new user.",
+    "examples": [
+      "Administrator.create({\n       firstName: 'Test',\n       lastName: 'Admin',\n       email: 'test@admin.com',\n       password: 'test'\n    })"
+    ],
+    "lineNumber": 21,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "user_obj",
+        "description": "The JSON User Object that is destructured then stored"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "get",
+    "memberof": "src/models/administrator.js~Administrator",
+    "longname": "src/models/administrator.js~Administrator.get",
+    "access": null,
+    "description": "Get a user based on the user's email.",
+    "examples": [
+      "Administrator.get('test@admin.com')"
+    ],
+    "lineNumber": 38,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "String"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "provider",
+        "description": "The user email to query."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "joinOrganization",
+    "memberof": "src/models/administrator.js~Administrator",
+    "longname": "src/models/administrator.js~Administrator.joinOrganization",
+    "access": null,
+    "description": "Let a client join an organization.",
+    "examples": [
+      "Client.joinOrganization({\n      userId: 1,\n      organizationId: 3\n    })"
+    ],
+    "lineNumber": 54,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "query_obj",
+        "description": "Object containing userId and organizationId"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/appointments.js",
+    "memberof": null,
+    "longname": "src/models/appointments.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { MAppointments } from './models';\nimport Bookshelf from '../Database.js';\n// /**\n//  * The AppointmentTypes enum that corresponds to the tb_UserType in the database\n//  */\n// export const AppointmentTypes = {\n//   REQUESTED: 1,\n//   MODIFIED: 2,\n//   APPROVED: 3\n// }\n\n/**\n * The User defines the total user supertable.\n */\nexport default class AppointmentsRoute {\n  /**\n   * Creates a new appointment, and returns it.\n   * @param {object} query_obj - The entire appointment object\n   * @param {function} cb - Callback function that takes one argument (user)\n   * @example\n   * Appointments.create({\n       clientId: 1,\n       providerId: 3,\n       state: 1,\n       info: \"\",\n       comments: \"\"\n     });\n   */\n  static create(query_obj, cb) {\n    new MAppointments(query_obj).save(null, {method: 'insert'})\n    .then( (appt) => cb(appt.toJSON()) )\n    .catch( (err) => cb(null, err) );\n  }\n\n  /**\n   * Update a previously made appointment.\n   * @param {object} query_obj - Must have the clientId, providerId and dateRequested, then modified fields\n   * @param {object} update_obj - The fields we want to update on the given model\n   * @param {function} cb - Callback function that takes one argument (user)\n   * @example\n   * Appointments.update({\n       clientId: 1,\n       providerId: 3,\n       dateRequested: 2015-02-11\n     }, {\n       comments: \"I do not think I will be able to make this day\",\n       state: 2\n     });\n   */\n  static update(query_obj, update_obj, cb) {\n    new MAppointments(query_obj).save(update_obj, {method: 'update'})\n    .then( (appt) => cb(appt.toJSON()) )\n    .catch( (err) => cb(null, err) );\n  }\n\n  /**\n   * Get all appointments for a client.\n   * @param {number} client_id - The client id we want appointments for\n   * @param {function} cb - Callback function that takes one argument (user)\n   * @example\n   * Appointments.client_appointments(1);\n   */\n  static client_appointments(client_id, cb) {\n    // new MAppointments().where('clientId', client_id).fetchAll({withRelated: ['provider']})\n    // .then( (appts) => {\n    //   console.log(appts)\n    //   cb(appts.toJSON())\n    // })\n    // .catch( (err) => cb(null, err) );\n    Bookshelf.knex.raw('SELECT * from \"tb_Appointments\" WHERE \"clientId\" = \\'' + client_id + '\\'').then((appts) => {\n      var ret = []\n      for(let i = 0; i < appts.rows.length; i++) {\n        Bookshelf.knex.raw('SELECT * from \"tb_Provider\" WHERE \"id\" = \\'' + appts.rows[i].providerId + '\\'').then((provider) => {\n          appts.rows[i].provider = provider.rows[0]\n          ret.push(appts.rows[i]);\n          if(i == appts.rows.length - 1) cb(ret);\n        });\n      }\n      if(appts.rows.length === 0) cb(ret);\n    })\n    .catch( (err) => cb(null, err) );\n  }\n\n  /**\n   * Get all appointments for a provider.\n   * @param {number} provider_id - The provider id we want appointments for\n   * @param {function} cb - Callback function that takes one argument (user)\n   * @example\n   * Appointments.provider_appointments(3);\n   */\n  static provider_appointments(provider_id, cb) {\n    // new MAppointments().where('providerId', provider_id).fetchAll({withRelated: ['client']})\n    // .then( (appts) => cb(appts.toJSON()) )\n    // .catch( (err) => cb(null, err) );\n    Bookshelf.knex.raw('SELECT * from \"tb_Appointments\" WHERE \"providerId\" = \\'' + provider_id + '\\'').then((appts) => {\n      var ret = []\n      for(let i = 0; i < appts.rows.length; i++) {\n        Bookshelf.knex.raw('SELECT * from \"tb_Client\" WHERE \"id\" = \\'' + appts.rows[i].clientId + '\\'').then((client) => {\n          appts.rows[i].client = client.rows[0]\n          ret.push(appts.rows[i]);\n          if(i == appts.rows.length - 1) cb(ret);\n        });\n      }\n      if(appts.rows.length === 0) cb(ret);\n    })\n    .catch( (err) => cb(null, err) );\n  }\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "AppointmentsRoute",
+    "memberof": "src/models/appointments.js",
+    "longname": "src/models/appointments.js~AppointmentsRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/appointments.js",
+    "importStyle": "AppointmentsRoute",
+    "description": "The User defines the total user supertable.",
+    "lineNumber": 15,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/appointments.js~AppointmentsRoute",
+    "longname": "src/models/appointments.js~AppointmentsRoute.create",
+    "access": null,
+    "description": "Creates a new appointment, and returns it.",
+    "examples": [
+      "Appointments.create({\n      clientId: 1,\n      providerId: 3,\n      state: 1,\n      info: \"\",\n      comments: \"\"\n    });"
+    ],
+    "lineNumber": 29,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "query_obj",
+        "description": "The entire appointment object"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "cb",
+        "description": "Callback function that takes one argument (user)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "update",
+    "memberof": "src/models/appointments.js~AppointmentsRoute",
+    "longname": "src/models/appointments.js~AppointmentsRoute.update",
+    "access": null,
+    "description": "Update a previously made appointment.",
+    "examples": [
+      "Appointments.update({\n      clientId: 1,\n      providerId: 3,\n      dateRequested: 2015-02-11\n    }, {\n      comments: \"I do not think I will be able to make this day\",\n      state: 2\n    });"
+    ],
+    "lineNumber": 50,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "query_obj",
+        "description": "Must have the clientId, providerId and dateRequested, then modified fields"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "update_obj",
+        "description": "The fields we want to update on the given model"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "cb",
+        "description": "Callback function that takes one argument (user)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "client_appointments",
+    "memberof": "src/models/appointments.js~AppointmentsRoute",
+    "longname": "src/models/appointments.js~AppointmentsRoute.client_appointments",
+    "access": null,
+    "description": "Get all appointments for a client.",
+    "examples": [
+      "Appointments.client_appointments(1);"
+    ],
+    "lineNumber": 63,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "client_id",
+        "description": "The client id we want appointments for"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "cb",
+        "description": "Callback function that takes one argument (user)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "provider_appointments",
+    "memberof": "src/models/appointments.js~AppointmentsRoute",
+    "longname": "src/models/appointments.js~AppointmentsRoute.provider_appointments",
+    "access": null,
+    "description": "Get all appointments for a provider.",
+    "examples": [
+      "Appointments.provider_appointments(3);"
+    ],
+    "lineNumber": 91,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "provider_id",
+        "description": "The provider id we want appointments for"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "cb",
+        "description": "Callback function that takes one argument (user)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/client.js",
+    "memberof": null,
+    "longname": "src/models/client.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { User, UserTypes } from './user';\nimport { MClient } from './models';\n\n/**\n * The Client defines the patient table within the UHRNinja database\n */\nexport default class Client {\n\n  /**\n   * Create a new client after creating a new user.\n   * @param {object} [user_obj] - The JSON User Object that is destructured then stored\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Client.create({\n        ssn: 123456789,\n        firstName: 'Test',\n        lastName: 'User',\n        email: 'test@test.com',\n        password: 'test'\n     })\n   */\n  static create(user_obj, cb) {\n    User.create(UserTypes.PATIENT, (user, err) => {\n      if(err) return cb(null, err);\n      user_obj.id = user.id;\n      new MClient(user_obj).save(null, {method: 'insert'})\n      .then((user) => cb(user.toJSON()))\n      .catch((err) => cb(null, err));\n    });\n  }\n\n  /**\n   * Get a user based on the user's email.\n   * @param {String} [clientEmail] - The user email to query.\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Client.get('sathyp@rpi.edu')\n   */\n  static get(clientEmail, cb) {\n    MClient.where('email', clientEmail).fetch({withRelated: ['family', 'organizations']})\n    .then((user) => cb(user.toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Join a family.\n   * @param {object} [query_obj] - Query object that houses the client ID and familyID\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Client.joinFamily({\n        clientId: 1,\n        familyId: 1\n     })\n   */\n  static joinFamily(query_obj, cb) {\n    new MClient({\n      id: query_obj.clientId,\n      familyId: query_obj.familyId\n    }).save()\n    .then(() => cb({success: true}))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Let a client join an organization.\n   * @param {object} [query_obj] - Object containing userId and organizationId\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Client.joinOrganization({\n       userId: 1,\n       organizationId: 3\n     })\n   */\n  static joinOrganization(query_obj, cb) {\n    MClient.where('id', query_obj.userId).fetch({withRelated: ['organizations']})\n    .then((user) => {\n      user.organizations().attach({\n        organizationId: query_obj.organizationId\n      })\n      .then(() => cb({success: true}))\n      .catch((err) => cb(null, err));\n    })\n    .catch((err) => cb(null, err));\n  }\n\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Client",
+    "memberof": "src/models/client.js",
+    "longname": "src/models/client.js~Client",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/client.js",
+    "importStyle": "Client",
+    "description": "The Client defines the patient table within the UHRNinja database",
+    "lineNumber": 7,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/client.js~Client",
+    "longname": "src/models/client.js~Client.create",
+    "access": null,
+    "description": "Create a new client after creating a new user.",
+    "examples": [
+      "Client.create({\n       ssn: 123456789,\n       firstName: 'Test',\n       lastName: 'User',\n       email: 'test@test.com',\n       password: 'test'\n    })"
+    ],
+    "lineNumber": 22,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "user_obj",
+        "description": "The JSON User Object that is destructured then stored"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "get",
+    "memberof": "src/models/client.js~Client",
+    "longname": "src/models/client.js~Client.get",
+    "access": null,
+    "description": "Get a user based on the user's email.",
+    "examples": [
+      "Client.get('sathyp@rpi.edu')"
+    ],
+    "lineNumber": 39,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "String"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "clientEmail",
+        "description": "The user email to query."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "joinFamily",
+    "memberof": "src/models/client.js~Client",
+    "longname": "src/models/client.js~Client.joinFamily",
+    "access": null,
+    "description": "Join a family.",
+    "examples": [
+      "Client.joinFamily({\n       clientId: 1,\n       familyId: 1\n    })"
+    ],
+    "lineNumber": 55,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "query_obj",
+        "description": "Query object that houses the client ID and familyID"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "joinOrganization",
+    "memberof": "src/models/client.js~Client",
+    "longname": "src/models/client.js~Client.joinOrganization",
+    "access": null,
+    "description": "Let a client join an organization.",
+    "examples": [
+      "Client.joinOrganization({\n      userId: 1,\n      organizationId: 3\n    })"
+    ],
+    "lineNumber": 74,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "query_obj",
+        "description": "Object containing userId and organizationId"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/family.js",
+    "memberof": null,
+    "longname": "src/models/family.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { MFamily } from './models';\n\n\n/**\n * The Family defines the family table within the UHRNinja database\n */\nexport default class Family {\n\n  /**\n   * Family create static function, facilitates creation of new families.\n   * @param {object} [fam_obj] - The JSON Family Object that is destructured then stores\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Family.create({\n        name: 'Smith Family'\n     })\n   */\n  static create(fam_obj, cb) {\n    new MFamily(fam_obj).save(null, {method: 'insert'})\n    .then((fam) => cb(fam.toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Get all the family members\n   * @param {Number} [id] - The family id.\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Family.getMembers(1)\n   */\n  static getMembers(id, cb) {\n    MFamily.where('id', id).fetch({withRelated: ['members']})\n    .then((fam) => cb(fam.related('members').toJSON()))\n    .catch((err) => cb(null, err));\n  }\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Family",
+    "memberof": "src/models/family.js",
+    "longname": "src/models/family.js~Family",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/family.js",
+    "importStyle": "Family",
+    "description": "The Family defines the family table within the UHRNinja database",
+    "lineNumber": 7,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/family.js~Family",
+    "longname": "src/models/family.js~Family.create",
+    "access": null,
+    "description": "Family create static function, facilitates creation of new families.",
+    "examples": [
+      "Family.create({\n       name: 'Smith Family'\n    })"
+    ],
+    "lineNumber": 18,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "fam_obj",
+        "description": "The JSON Family Object that is destructured then stores"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "getMembers",
+    "memberof": "src/models/family.js~Family",
+    "longname": "src/models/family.js~Family.getMembers",
+    "access": null,
+    "description": "Get all the family members",
+    "examples": [
+      "Family.getMembers(1)"
+    ],
+    "lineNumber": 31,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Number"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "id",
+        "description": "The family id."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/familyrequests.js",
+    "memberof": null,
+    "longname": "src/models/familyrequests.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { MFamilyRequests } from './models';\n\n/**\n * The FamilyRequests defines the family requests table within the UHRNinja database\n */\nexport default class FamilyRequests {\n\n  /**\n   * Create a new invite for a user into a family.\n   * @param {object} [famreq_obj] - The JSON Family Request Object that is destructured then stores\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * FamilyRequests.create({\n        clientId: 1,\n        familyId: 3\n     })\n   */\n  static create(famreq_obj, cb) {\n    new MFamilyRequests(famreq_obj).save(null, {method: 'insert'})\n    .then((obj) => cb(obj.toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Get all the invites for a given user.\n   * @param {number} [client_id] - The client id we want invites for\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * FamilyRequests.get(1)\n   */\n  static get(client_id, cb) {\n    MFamilyRequests.where('clientId', client_id).fetch({withRelated: ['family']})\n    .then((fam) => cb(fam.related('family').toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Delete an invite for a given user.\n   * @param {object} [query] - Query object\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * FamilyRequests.delete({\n        clientId: 1,\n        familyId: 3\n     })\n   */\n  static delete(query, cb) {\n    new MFamilyRequests(query).destroy()\n    .then(() => cb({success: true}))\n    .catch((err) => cb(null, err));\n  }\n\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "FamilyRequests",
+    "memberof": "src/models/familyrequests.js",
+    "longname": "src/models/familyrequests.js~FamilyRequests",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/familyrequests.js",
+    "importStyle": "FamilyRequests",
+    "description": "The FamilyRequests defines the family requests table within the UHRNinja database",
+    "lineNumber": 6,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/familyrequests.js~FamilyRequests",
+    "longname": "src/models/familyrequests.js~FamilyRequests.create",
+    "access": null,
+    "description": "Create a new invite for a user into a family.",
+    "examples": [
+      "FamilyRequests.create({\n       clientId: 1,\n       familyId: 3\n    })"
+    ],
+    "lineNumber": 18,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "famreq_obj",
+        "description": "The JSON Family Request Object that is destructured then stores"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "get",
+    "memberof": "src/models/familyrequests.js~FamilyRequests",
+    "longname": "src/models/familyrequests.js~FamilyRequests.get",
+    "access": null,
+    "description": "Get all the invites for a given user.",
+    "examples": [
+      "FamilyRequests.get(1)"
+    ],
+    "lineNumber": 31,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "client_id",
+        "description": "The client id we want invites for"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "delete",
+    "memberof": "src/models/familyrequests.js~FamilyRequests",
+    "longname": "src/models/familyrequests.js~FamilyRequests.delete",
+    "access": null,
+    "description": "Delete an invite for a given user.",
+    "examples": [
+      "FamilyRequests.delete({\n       clientId: 1,\n       familyId: 3\n    })"
+    ],
+    "lineNumber": 47,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "query",
+        "description": "Query object"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/models.js",
+    "memberof": null,
+    "longname": "src/models/models.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import bookshelf from '../Database.js';\n\n/**\n * User supermodel, houses type and id.\n */\nexport const MUser = bookshelf.Model.extend({\n  tableName: 'tb_User'\n});\n\n/**\n * Client model, references user.\n */\nexport const MClient = bookshelf.Model.extend({\n  tableName: 'tb_Client',\n  family: function() {\n    return this.belongsTo(MFamily, 'familyId');\n  },\n\n  organizations: function() {\n    return this.belongsToMany(MOrganization, 'tb_RefUserOrganization', 'userId', 'organizationId');\n  },\n\n  user: function() {\n    return this.belongsTo(MUser, 'id');\n  }\n});\n\n/**\n * Provider model, references user.\n */\nexport const MProvider = bookshelf.Model.extend({\n  tableName: 'tb_Provider',\n\n  specializations: function(){\n    return this.belongsToMany(MTaxonomy, 'tb_RefProviderTaxonomy', 'providerId', 'taxonomyCode');\n  },\n\n  organizations: function() {\n    return this.belongsToMany(MOrganization, 'tb_RefUserOrganization', 'userId', 'organizationId');\n  },\n\n  user: function() {\n    return this.belongsTo(MUser, 'id');\n  }\n});\n\n/**\n * Administrator model, references user.\n */\nexport const MAdministrator = bookshelf.Model.extend({\n  tableName: 'tb_Administrator',\n\n  organization: function() {\n    return this.belongsTo(MOrganization, 'organizationId');\n  },\n\n  user: function() {\n    return this.belongsTo(MUser, 'id');\n  }\n});\n\n/**\n * Organization model, houses name and id and address\n */\nexport const MOrganization = bookshelf.Model.extend({\n  tableName: 'tb_Organization',\n  admins: function() {\n    return this.hasMany(MAdministrator, 'organizationId');\n  },\n\n  providers: function() {\n    return this.belongsToMany(MProvider, 'tb_RefUserOrganization', 'organizationId', 'userId');\n  },\n\n  clients: function() {\n    return this.belongsToMany(MClient, 'tb_RefUserOrganization', 'organizationId', 'userId');\n  }\n});\n\n/**\n * Family model, houses name and id\n */\nexport const MFamily = bookshelf.Model.extend({\n  tableName: 'tb_Family',\n  members: function() {\n    return this.hasMany(MClient, 'familyId');\n  }\n});\n\n/**\n * Taxonomy model, houses code and metadata for taxonomy data\n */\nexport const MTaxonomy = bookshelf.Model.extend({\n  tableName: 'tb_Taxonomy',\n  idAttribute: 'code'\n});\n\n\n/**\n * Family invites relational model.\n */\nexport const MFamilyRequests = bookshelf.Model.extend({\n  tableName: 'tb_FamilyRequests',\n  idAttribute: 'clientId',\n  idAttributes: ['clientId', 'familyId'],\n\n  client: function() {\n    return this.belongsTo(MClient, 'clientId');\n  },\n\n  family: function() {\n    return this.belongsTo(MFamily, 'familyId');\n  }\n});\n\n/**\n * Organization invites relational model.\n */\nexport const MOrganizationRequests = bookshelf.Model.extend({\n  tableName: 'tb_OrganizationRequests',\n  idAttribute: 'userId',\n  idAttributes: ['userId', 'organizationId'],\n\n  user: function() {\n    return this.belongsTo(MUser, 'userId');\n  },\n\n  organization: function() {\n    return this.belongsTo(MOrganization, 'organizationId');\n  }\n});\n\n/**\n * Appointments relational model.\n */\nexport const MAppointments = bookshelf.Model.extend({\n  tableName: 'tb_Appointments',\n  idAttribute: 'id',\n  idAttributes: ['id'],\n\n  client: function() {\n    return this.belongsTo(MClient, 'clientId');\n  },\n\n  provider: function() {\n    return this.belongsTo(MProvider, 'providerId');\n  }\n});\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MUser",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MUser",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MUser}",
+    "description": "User supermodel, houses type and id.",
+    "lineNumber": 6,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MClient",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MClient",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MClient}",
+    "description": "Client model, references user.",
+    "lineNumber": 13,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MProvider",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MProvider",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MProvider}",
+    "description": "Provider model, references user.",
+    "lineNumber": 31,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MAdministrator",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MAdministrator",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MAdministrator}",
+    "description": "Administrator model, references user.",
+    "lineNumber": 50,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MOrganization",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MOrganization",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MOrganization}",
+    "description": "Organization model, houses name and id and address",
+    "lineNumber": 65,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MFamily",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MFamily",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MFamily}",
+    "description": "Family model, houses name and id",
+    "lineNumber": 83,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MTaxonomy",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MTaxonomy",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MTaxonomy}",
+    "description": "Taxonomy model, houses code and metadata for taxonomy data",
+    "lineNumber": 93,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MFamilyRequests",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MFamilyRequests",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MFamilyRequests}",
+    "description": "Family invites relational model.",
+    "lineNumber": 102,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MOrganizationRequests",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MOrganizationRequests",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MOrganizationRequests}",
+    "description": "Organization invites relational model.",
+    "lineNumber": 119,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "MAppointments",
+    "memberof": "src/models/models.js",
+    "longname": "src/models/models.js~MAppointments",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/models.js",
+    "importStyle": "{MAppointments}",
+    "description": "Appointments relational model.",
+    "lineNumber": 136,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/organization.js",
+    "memberof": null,
+    "longname": "src/models/organization.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { MOrganization } from './models';\n\n\n/**\n * The Organization defines the organization table within the UHRNinja database\n */\nexport default class Organization {\n\n  /**\n   * Create a new organization\n   * @param {object} [org_obj] - The JSON Family Object that is destructured then stores\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Organization.create({\n        name: 'Primary Provider',\n        state: 'NY',\n        address: '123 Test Lane',\n        zip: '12345',\n        phone: '123456790'\n     })\n   */\n  static create(org_obj, cb) {\n    new MOrganization(org_obj).save(null, {method: 'insert'})\n    .then((org) => cb(org.toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Get all the doctors in a given organization\n   * @param {number} [org_id] - Get all the doctors within an organization\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Organization.get_providers(org_id)\n   */\n  static get_providers(org_id, cb) {\n    MOrganization.where('id', org_id).fetch({withRelated: ['providers']})\n    .then((org) => cb(org.related('providers').toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Get all the people in a given organization\n   * @param {number} [org_id] - Get all the people within an organization\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Organization.get_all(org_id)\n   */\n  static get_all(org_id, cb) {\n    MOrganization.where('id', org_id).fetch({withRelated: ['providers', 'clients', 'admins']})\n    .then((org) => cb(org.toJSON()))\n    .catch((err) => cb(null, err));\n  }\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Organization",
+    "memberof": "src/models/organization.js",
+    "longname": "src/models/organization.js~Organization",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/organization.js",
+    "importStyle": "Organization",
+    "description": "The Organization defines the organization table within the UHRNinja database",
+    "lineNumber": 7,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/organization.js~Organization",
+    "longname": "src/models/organization.js~Organization.create",
+    "access": null,
+    "description": "Create a new organization",
+    "examples": [
+      "Organization.create({\n       name: 'Primary Provider',\n       state: 'NY',\n       address: '123 Test Lane',\n       zip: '12345',\n       phone: '123456790'\n    })"
+    ],
+    "lineNumber": 22,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "org_obj",
+        "description": "The JSON Family Object that is destructured then stores"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "get_providers",
+    "memberof": "src/models/organization.js~Organization",
+    "longname": "src/models/organization.js~Organization.get_providers",
+    "access": null,
+    "description": "Get all the doctors in a given organization",
+    "examples": [
+      "Organization.get_providers(org_id)"
+    ],
+    "lineNumber": 35,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "org_id",
+        "description": "Get all the doctors within an organization"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "get_all",
+    "memberof": "src/models/organization.js~Organization",
+    "longname": "src/models/organization.js~Organization.get_all",
+    "access": null,
+    "description": "Get all the people in a given organization",
+    "examples": [
+      "Organization.get_all(org_id)"
+    ],
+    "lineNumber": 48,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "org_id",
+        "description": "Get all the people within an organization"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/organizationrequests.js",
+    "memberof": null,
+    "longname": "src/models/organizationrequests.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { MOrganizationRequests } from './models';\n\n/**\n * The OrganizationRequests defines the organization requests table within the UHRNinja database\n */\nexport default class OrganizationRequests {\n\n  /**\n   * Create a new invite for a user into a organization.\n   * @param {object} [orgreq_obj] - The JSON Org Request Object that is destructured then stores\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * OrganizationRequests.create({\n        clientId: 1,\n        organizationId: 3\n     })\n   */\n  static create(orgreq_obj, cb) {\n    new MOrganizationRequests(orgreq_obj).save(null, {method: 'insert'})\n    .then((obj) => cb(obj.toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Get all the invites for a given user.\n   * @param {number} [user_id] - The client id we want invites for\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * OrganizationRequests.get(1)\n   */\n  static get(user_id, cb) {\n    MOrganizationRequests.where('userId', user_id).fetch({ withRelated: ['organization'] })\n    .then((org) => cb(org.related('organization').toJSON()))\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Delete an invite for a given user.\n   * @param {object} [query] - Query object\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * OrganizationRequests.delete({\n        userId: 1,\n        organizationId: 3\n     })\n   */\n  static delete(query, cb) {\n    new MOrganizationRequests(query).destroy()\n    .then(() => cb({success: true}))\n    .catch((err) => cb(null, err));\n  }\n\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "OrganizationRequests",
+    "memberof": "src/models/organizationrequests.js",
+    "longname": "src/models/organizationrequests.js~OrganizationRequests",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/organizationrequests.js",
+    "importStyle": "OrganizationRequests",
+    "description": "The OrganizationRequests defines the organization requests table within the UHRNinja database",
+    "lineNumber": 6,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/organizationrequests.js~OrganizationRequests",
+    "longname": "src/models/organizationrequests.js~OrganizationRequests.create",
+    "access": null,
+    "description": "Create a new invite for a user into a organization.",
+    "examples": [
+      "OrganizationRequests.create({\n       clientId: 1,\n       organizationId: 3\n    })"
+    ],
+    "lineNumber": 18,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "orgreq_obj",
+        "description": "The JSON Org Request Object that is destructured then stores"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "get",
+    "memberof": "src/models/organizationrequests.js~OrganizationRequests",
+    "longname": "src/models/organizationrequests.js~OrganizationRequests.get",
+    "access": null,
+    "description": "Get all the invites for a given user.",
+    "examples": [
+      "OrganizationRequests.get(1)"
+    ],
+    "lineNumber": 31,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "user_id",
+        "description": "The client id we want invites for"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "delete",
+    "memberof": "src/models/organizationrequests.js~OrganizationRequests",
+    "longname": "src/models/organizationrequests.js~OrganizationRequests.delete",
+    "access": null,
+    "description": "Delete an invite for a given user.",
+    "examples": [
+      "OrganizationRequests.delete({\n       userId: 1,\n       organizationId: 3\n    })"
+    ],
+    "lineNumber": 47,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "query",
+        "description": "Query object"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/provider.js",
+    "memberof": null,
+    "longname": "src/models/provider.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { User, UserTypes } from './user';\nimport { MProvider } from './models';\n\n/**\n * The Provider defines the provider table within the UHRNinja database\n */\nexport default class Provider {\n\n  /**\n   * Create a new provider after creating a new user.\n   * @param {object} [user_obj] - The JSON User Object that is destructured then stored\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Provider.create({\n        ssn: 123456789,\n        npi: 123456789,\n        firstName: 'Test',\n        lastName: 'User',\n        email: 'test@provider.com',\n        password: 'test',\n        prefix: 'Mr.'\n     })\n   */\n  static create(user_obj, cb) {\n    User.create(UserTypes.PROVIDER, (user, err) => {\n      if(err) return cb(null, err);\n      user_obj.id = user.id;\n      new MProvider(user_obj).save(null, {method: 'insert'})\n      .then((user) => cb(user.toJSON()))\n      .catch((err) => cb(null, err));\n    });\n  }\n\n  /**\n   * Get a user based on the user's email.\n   * @param {String} [providerEmail] - The user email to query.\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Provider.get('test@provider.com')\n   */\n  static get(providerEmail, cb) {\n    MProvider.where('email', providerEmail).fetch({withRelated: ['specializations', 'organizations']})\n    .then((user) => cb(user.toJSON()))\n    .catch((err) => {\n      console.log(err);\n      cb(null, err)\n    });\n  }\n\n  /**\n   * Assign a provider a specialty.\n   * @param {object} [query_obj] - Object containing provider email and taxonomy code\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Provider.assignSpecialization({\n       email: \"test@provider.com\",\n       code: \"101YA0400X\"\n     })\n   */\n  static assignSpecialization(query_obj, cb) {\n    MProvider.where('email', query_obj.email).fetch({withRelated: ['specializations']})\n    .then((user) => {\n      user.specializations().attach({\n        taxonomyCode: query_obj.code\n      })\n      .then(() => cb({success: true}))\n      .catch((err) => cb(null, err));\n    })\n    .catch((err) => cb(null, err));\n  }\n\n  /**\n   * Let a provider join an organization.\n   * @param {object} [query_obj] - Object containing userId and organizationId\n   * @param {function} [cb] - Callback function that takes two argument (obj, err)\n   * @example\n   * Provider.joinOrganization({\n       userId: 1,\n       organizationId: 3\n     })\n   */\n  static joinOrganization(query_obj, cb) {\n    MProvider.where('id', query_obj.userId).fetch({withRelated: ['organizations']})\n    .then((user) => {\n      user.organizations().attach({\n        organizationId: query_obj.organizationId\n      })\n      .then(() => cb({success: true}))\n      .catch((err) => cb(null, err));\n    })\n    .catch((err) => cb(null, err));\n  }\n\n}\n"
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "Provider",
+    "memberof": "src/models/provider.js",
+    "longname": "src/models/provider.js~Provider",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/provider.js",
+    "importStyle": "Provider",
+    "description": "The Provider defines the provider table within the UHRNinja database",
+    "lineNumber": 7,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/provider.js~Provider",
+    "longname": "src/models/provider.js~Provider.create",
+    "access": null,
+    "description": "Create a new provider after creating a new user.",
+    "examples": [
+      "Provider.create({\n       ssn: 123456789,\n       npi: 123456789,\n       firstName: 'Test',\n       lastName: 'User',\n       email: 'test@provider.com',\n       password: 'test',\n       prefix: 'Mr.'\n    })"
+    ],
+    "lineNumber": 24,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "user_obj",
+        "description": "The JSON User Object that is destructured then stored"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "get",
+    "memberof": "src/models/provider.js~Provider",
+    "longname": "src/models/provider.js~Provider.get",
+    "access": null,
+    "description": "Get a user based on the user's email.",
+    "examples": [
+      "Provider.get('test@provider.com')"
+    ],
+    "lineNumber": 41,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "String"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "providerEmail",
+        "description": "The user email to query."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "assignSpecialization",
+    "memberof": "src/models/provider.js~Provider",
+    "longname": "src/models/provider.js~Provider.assignSpecialization",
+    "access": null,
+    "description": "Assign a provider a specialty.",
+    "examples": [
+      "Provider.assignSpecialization({\n      email: \"test@provider.com\",\n      code: \"101YA0400X\"\n    })"
+    ],
+    "lineNumber": 60,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "query_obj",
+        "description": "Object containing provider email and taxonomy code"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "joinOrganization",
+    "memberof": "src/models/provider.js~Provider",
+    "longname": "src/models/provider.js~Provider.joinOrganization",
+    "access": null,
+    "description": "Let a provider join an organization.",
+    "examples": [
+      "Provider.joinOrganization({\n      userId: 1,\n      organizationId: 3\n    })"
+    ],
+    "lineNumber": 82,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "object"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "query_obj",
+        "description": "Object containing userId and organizationId"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": true,
+        "name": "cb",
+        "description": "Callback function that takes two argument (obj, err)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/models/user.js",
+    "memberof": null,
+    "longname": "src/models/user.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import { MUser } from './models';\n\n/**\n * The UserTypes enum that corresponds to the tb_UserType in the database\n */\nexport const UserTypes = {\n  PATIENT: 1,\n  PROVIDER: 2,\n  ADMINISTRATOR: 3\n}\n\n/**\n * The User defines the total user supertable.\n */\nexport class User {\n  /**\n   * Creates a new user, and returns the ID.\n   * @param {integer} t_id - The type id from the UserTypes enum\n   * @param {function} cb - Callback function that takes one argument (user)\n   * @example\n   * User.create(UserTypes.PATIENT);\n   */\n  static create(t_id, cb) {\n    new MUser({type_id: t_id}).save()\n    .then( (user) => cb(user.toJSON()) )\n    .catch( (err) => cb(null, err) );\n  }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "UserTypes",
+    "memberof": "src/models/user.js",
+    "longname": "src/models/user.js~UserTypes",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/user.js",
+    "importStyle": "{UserTypes}",
+    "description": "The UserTypes enum that corresponds to the tb_UserType in the database",
+    "lineNumber": 6,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "User",
+    "memberof": "src/models/user.js",
+    "longname": "src/models/user.js~User",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/models/user.js",
+    "importStyle": "{User}",
+    "description": "The User defines the total user supertable.",
+    "lineNumber": 15,
+    "interface": false
+  },
+  {
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "create",
+    "memberof": "src/models/user.js~User",
+    "longname": "src/models/user.js~User.create",
+    "access": null,
+    "description": "Creates a new user, and returns the ID.",
+    "examples": [
+      "User.create(UserTypes.PATIENT);"
+    ],
+    "lineNumber": 23,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "integer"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "t_id",
+        "description": "The type id from the UserTypes enum"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "cb",
+        "description": "Callback function that takes one argument (user)"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/routes/administrator.js",
+    "memberof": null,
+    "longname": "src/routes/administrator.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Administrator from '../models/administrator';\nimport OrganizationRequests from '../models/organizationrequests';\n\nimport Express from 'express'\nconst rtr = Express.Router();\n\n/**\n * AdministratorRoute serves all administrator related endpoints.\n */\nexport default class AdministratorRoute {\n  /**\n   * Place all routes inside the constructor, so that they will be built.\n   */\n  constructor() {\n    /**\n     * @api {get} /admin/get/:email Request Administrator information\n     * @apiName GetAdmin\n     * @apiGroup Administrator\n     *\n     * @apiParam {String} email Admins unique email.\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"ssn\": \"123456789\",\n     *       \"familyId\": \"1\",\n     *       \"firstName\": \"Pranav\",\n     *       \"lastName\": \"Sathy\",\n     *       \"email\": \"sathyp@rpi.edu\",\n     *       \"password\": \"test\",\n     *       \"organization\": {\n     *         \"id\": \"1\",\n     *         \"name\": \"Primary Practice\"\n     *          ...\n     *       }\n     *     }\n     *\n     * @apiSuccess {Object} result JSON Object representing the admin object in the database.\n     * @apiError {String} err A statement that the requested email was invalid.\n     */\n    rtr.get('/get/:email', (req, res) => {\n      Administrator.get(req.params.email, (user, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(user);\n      });\n    });\n\n    /**\n     * @api {post} /admin/create/ Create New Administrator\n     * @apiName CreateAdmin\n     * @apiGroup Administrator\n     *\n     * @apiParam {Object} user The user object that you want to create.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"firstName\": 'Pranav',\n     *       \"lastName\": 'Sathy',\n     *       \"email\": 'sathyp@rpi.edu',\n     *       \"password\": 'test'\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"firstName\": \"Pranav\",\n     *       \"lastName\": \"Sathy\",\n     *       \"email\": \"sathyp@rpi.edu\",\n     *       \"password\": \"test\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the admin object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/create', (req, res) => {\n      Administrator.create(req.body, (user, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(user);\n      });\n    });\n\n    /**\n     * @api {get} /client/get_org_invtes/:admin_id Get a clients invites\n     * @apiName GetOrgInvites\n     * @apiGroup Provider\n     *\n     * @apiParam {Number} admin_id The admin ID we want invites for.\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"name\": \"Test Family\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the invite object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/get_org_invites/:admin_id', (req, res) => {\n      OrganizationRequests.get(req.params.admin_id, (orgs, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(orgs);\n      });\n    });\n\n    /**\n     * @api {post} /provider/accept_org_invite/ Accept a family invite\n     * @apiName AcceptOrgInvites\n     * @apiGroup Administrator\n     *\n     * @apiParam {Object} invite An object with the user and organization id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/accept_org_invite', (req, res) => {\n      OrganizationRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else Administrator.joinOrganization(req.body, (user, err) => {\n          if(err) return res.status(400).send(err);\n          else return res.send(user);\n        })\n      });\n    });\n\n    /**\n     * @api {post} /client/reject_org_invite/ Reject an organization invite\n     * @apiName RejectOrgInvites\n     * @apiGroup Administrator\n     *\n     * @apiParam {Object} invite An object with the user and organization id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/reject_org_invite', (req, res) => {\n      OrganizationRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(deleted);\n      });\n    });\n\n  }\n\n  /**\n   * Get the router instance for this class\n   */\n  router() { return rtr; }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "rtr",
+    "memberof": "src/routes/administrator.js",
+    "longname": "src/routes/administrator.js~rtr",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/routes/administrator.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "AdministratorRoute",
+    "memberof": "src/routes/administrator.js",
+    "longname": "src/routes/administrator.js~AdministratorRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/routes/administrator.js",
+    "importStyle": "AdministratorRoute",
+    "description": "AdministratorRoute serves all administrator related endpoints.",
+    "lineNumber": 10,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/routes/administrator.js~AdministratorRoute",
+    "longname": "src/routes/administrator.js~AdministratorRoute#constructor",
+    "access": null,
+    "description": "Place all routes inside the constructor, so that they will be built.",
+    "lineNumber": 14,
+    "params": [],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "router",
+    "memberof": "src/routes/administrator.js~AdministratorRoute",
+    "longname": "src/routes/administrator.js~AdministratorRoute#router",
+    "access": null,
+    "description": "Get the router instance for this class",
+    "lineNumber": 162,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/routes/appointments.js",
+    "memberof": null,
+    "longname": "src/routes/appointments.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Appointments from '../models/appointments';\nimport Express from 'express'\n\nconst rtr = Express.Router();\n\n/**\n * FamilyRoute serves all family related endpoints.\n */\nexport default class AppointmentRoute {\n  /**\n   * Place all routes inside the constructor, so that they will be built.\n   */\n  constructor() {\n\n    /**\n     * @api {post} /appt/create/ Create New Appointment\n     * @apiName CreateAppointment\n     * @apiGroup Appointments\n     *\n     * @apiParam {number} clientId The ID of the client\n     * @apiParam {number} providerId The ID of the provider\n     * @apiParam {number} state [1: Requested, 2: Modified, 3: Approved]\n     * @apiParam {string} info Miscellaenous pre-appt information\n     * @apiParam {string} comments Doctor comments for the appointments.\n\n     * @apiSuccess {Object} result JSON object of the appointment.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/create', (req, res) => {\n      Appointments.create(req.body, (fam, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(fam);\n      });\n    });\n\n    /**\n     * @api {post} /appt/update/ Update An Appointment\n     * @apiName UpdateAppointment\n     * @apiGroup Appointments\n     *\n     * @apiParam {object} query An object with clientId, providerId and dateRequested\n     * @apiParam {object} update An object with [optional], info, comments, dateRequested, state\n\n     * @apiSuccess {Object} result JSON object of the updated appointment.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/update', (req, res) => {\n      Appointments.update(req.body.query, req.body.update, (fam, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(fam);\n      });\n    });\n\n    /**\n     * @api {get} /appt/client/:id Get appointments for a client\n     * @apiName GetClientAppts\n     * @apiGroup Appointments\n     *\n     * @apiParam {number} id Id of the client we want appointments for\n     * @apiSuccess {Object} result JSON object with all appointments.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/client/:id', (req, res) => {\n      Appointments.client_appointments(req.params.id, (fam, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(fam);\n      });\n    });\n\n    /**\n     * @api {get} /appt/provider/:id Get appointments for a provider\n     * @apiName GetProviderAppts\n     * @apiGroup Appointments\n     *\n     * @apiParam {number} id Id of the provider we want appointments for\n     * @apiSuccess {Object} result JSON object with all appointments.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/provider/:id', (req, res) => {\n      Appointments.provider_appointments(req.params.id, (fam, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(fam);\n      });\n    });\n\n  }\n\n  /**\n   * Get the router instance for this class\n   */\n  router() { return rtr; }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "rtr",
+    "memberof": "src/routes/appointments.js",
+    "longname": "src/routes/appointments.js~rtr",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/routes/appointments.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 4,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "AppointmentRoute",
+    "memberof": "src/routes/appointments.js",
+    "longname": "src/routes/appointments.js~AppointmentRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/routes/appointments.js",
+    "importStyle": "AppointmentRoute",
+    "description": "FamilyRoute serves all family related endpoints.",
+    "lineNumber": 9,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/routes/appointments.js~AppointmentRoute",
+    "longname": "src/routes/appointments.js~AppointmentRoute#constructor",
+    "access": null,
+    "description": "Place all routes inside the constructor, so that they will be built.",
+    "lineNumber": 13,
+    "params": [],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "router",
+    "memberof": "src/routes/appointments.js~AppointmentRoute",
+    "longname": "src/routes/appointments.js~AppointmentRoute#router",
+    "access": null,
+    "description": "Get the router instance for this class",
+    "lineNumber": 91,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/routes/client.js",
+    "memberof": null,
+    "longname": "src/routes/client.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Client from '../models/client';\nimport FamilyRequests from '../models/familyrequests';\nimport OrganizationRequests from '../models/organizationrequests';\n\nimport Express from 'express'\nconst rtr = Express.Router();\n\n/**\n * ClientRoute serves all patient related endpoints.\n */\nexport default class ClientRoute {\n  /**\n   * Place all routes inside the constructor, so that they will be built.\n   */\n  constructor() {\n    /**\n     * @api {get} /client/get/:email Request Client information\n     * @apiName GetClient\n     * @apiGroup Client\n     *\n     * @apiParam {String} email Clients unique email.\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"ssn\": \"123456789\",\n     *       \"familyId\": \"1\",\n     *       \"firstName\": \"Pranav\",\n     *       \"lastName\": \"Sathy\",\n     *       \"email\": \"sathyp@rpi.edu\",\n     *       \"password\": \"test\",\n     *       \"family\": {\n     *         \"id\": \"1\",\n     *         \"name\": \"Test Family\"\n     *       }\n     *     }\n     *\n     * @apiSuccess {Object} result JSON Object representing the client object in the database.\n     * @apiError {String} err A statement that the requested email was invalid.\n     */\n    rtr.get('/get/:email', (req, res) => {\n      Client.get(req.params.email, (user, err) => {\n        if(err) return res.status(400).send(\"Requested e-mail is invalid.\");\n        if(!Object.keys(user).length) return res.status(400).send(\"The e-mail is invalid.\");\n        else return res.send(user);\n      });\n    });\n\n    /**\n     * @api {post} /client/create/ Create New Client\n     * @apiName CreateUser\n     * @apiGroup Client\n     *\n     * @apiParam {Object} user The user object that you want to create.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"ssn\": 123456789,\n     *       \"firstName\": 'Pranav',\n     *       \"lastName\": 'Sathy',\n     *       \"email\": 'sathyp@rpi.edu',\n     *       \"password\": 'test'\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"ssn\": \"123456789\",\n     *       \"firstName\": \"Pranav\",\n     *       \"lastName\": \"Sathy\",\n     *       \"email\": \"sathyp@rpi.edu\",\n     *       \"password\": \"test\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the client object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/create', (req, res) => {\n      Client.create(req.body, (user, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(user);\n      });\n    });\n\n    /**\n     * @api {get} /client/get_family_invtes/:client_id Get Family Invites\n     * @apiName GetFamilyInvites\n     * @apiGroup Client\n     *\n     * @apiParam {Number} client_id The client ID we want invites for.\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"name\": \"Test Family\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the invite object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/get_family_invites/:client_id', (req, res) => {\n      FamilyRequests.get(req.params.client_id, (fams, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(fams);\n      });\n    });\n\n    /**\n     * @api {get} /client/get_org_invtes/:client_id Get Organization Invites\n     * @apiName GetOrgInvites\n     * @apiGroup Client\n     *\n     * @apiParam {Number} client_id The client ID we want invites for.\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"name\": \"Test Family\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the invite object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/get_org_invites/:client_id', (req, res) => {\n      OrganizationRequests.get(req.params.client_id, (orgs, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(orgs);\n      });\n    });\n\n    /**\n     * @api {post} /client/accept_fam_invite/ Accept a family invite\n     * @apiName AcceptFamInvites\n     * @apiGroup Client\n     *\n     * @apiParam {Object} invite An object with the client and family id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"clientId\": 1,\n     *       \"familyId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/accept_fam_invite', (req, res) => {\n      FamilyRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else Client.joinFamily(req.body, (user, err) => {\n          if(err) return res.status(400).send(err);\n          else return res.send(user);\n        })\n      });\n    });\n\n    /**\n     * @api {post} /client/accept_org_invite/ Accept an organization invite\n     * @apiName AcceptOrgInvites\n     * @apiGroup Client\n     *\n     * @apiParam {Object} invite An object with the user and organization id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/accept_org_invite', (req, res) => {\n      OrganizationRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else Client.joinOrganization(req.body, (user, err) => {\n          if(err) return res.status(400).send(err);\n          else return res.send(user);\n        })\n      });\n    });\n\n\n    /**\n     * @api {post} /client/reject_fam_invite/ Reject a family invite\n     * @apiName RejectFamInvites\n     * @apiGroup Client\n     *\n     * @apiParam {Object} invite An object with the client and family id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"clientId\": 1,\n     *       \"familyId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/reject_fam_invite', (req, res) => {\n      FamilyRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(deleted);\n      });\n    });\n\n    /**\n     * @api {post} /client/reject_org_invite/ Reject an organization invite\n     * @apiName RejectOrgInvites\n     * @apiGroup Client\n     *\n     * @apiParam {Object} invite An object with the user and organization id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/reject_org_invite', (req, res) => {\n      OrganizationRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(deleted);\n      });\n    });\n\n  }\n\n  /**\n   * Get the router instance for this class\n   */\n  router() { return rtr; }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "rtr",
+    "memberof": "src/routes/client.js",
+    "longname": "src/routes/client.js~rtr",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/routes/client.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 6,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "ClientRoute",
+    "memberof": "src/routes/client.js",
+    "longname": "src/routes/client.js~ClientRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/routes/client.js",
+    "importStyle": "ClientRoute",
+    "description": "ClientRoute serves all patient related endpoints.",
+    "lineNumber": 11,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/routes/client.js~ClientRoute",
+    "longname": "src/routes/client.js~ClientRoute#constructor",
+    "access": null,
+    "description": "Place all routes inside the constructor, so that they will be built.",
+    "lineNumber": 15,
+    "params": [],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "router",
+    "memberof": "src/routes/client.js~ClientRoute",
+    "longname": "src/routes/client.js~ClientRoute#router",
+    "access": null,
+    "description": "Get the router instance for this class",
+    "lineNumber": 243,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/routes/family.js",
+    "memberof": null,
+    "longname": "src/routes/family.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Family from '../models/family';\nimport FamilyRequests from '../models/familyrequests';\nimport Express from 'express'\n\nconst rtr = Express.Router();\n\n/**\n * FamilyRoute serves all family related endpoints.\n */\nexport default class FamilyRoute {\n  /**\n   * Place all routes inside the constructor, so that they will be built.\n   */\n  constructor() {\n\n    /**\n     * @api {post} /family/create/ Create New Family\n     * @apiName CreateFamily\n     * @apiGroup Family\n     *\n     * @apiParam {Object} family The family object that you want to create.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"name\": \"Test Family\",\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": 1,\n     *       \"name\": \"Test Family\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the family object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/create', (req, res) => {\n      Family.create(req.body, (fam, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(fam);\n      });\n    });\n\n    /**\n     * @api {get} /family/getMembers/:id Get Family\n     * @apiName GetMembers\n     * @apiGroup Family\n     *\n     * @apiParam {Number} id The family ID\n     * @apiSuccess {Object} result JSON Object representing the clients.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/getMembers/:id', (req, res) => {\n      Family.getMembers(req.params.id, (members, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(members);\n      });\n    });\n\n    /**\n     * @api {post} /family/invite/ Invite a user to a family\n     * @apiName InviteFamily\n     * @apiGroup Family\n     *\n     * @apiParam {Object} invite The client id and family id to send invites for.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"clientId\": 1,\n     *       \"familyId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"clientId\": 1,\n     *       \"familyId\": 3\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the invite object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/invite', (req, res) => {\n      FamilyRequests.create(req.body, (invite, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(invite);\n      });\n    });\n\n  }\n\n  /**\n   * Get the router instance for this class\n   */\n  router() { return rtr; }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "rtr",
+    "memberof": "src/routes/family.js",
+    "longname": "src/routes/family.js~rtr",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/routes/family.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "FamilyRoute",
+    "memberof": "src/routes/family.js",
+    "longname": "src/routes/family.js~FamilyRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/routes/family.js",
+    "importStyle": "FamilyRoute",
+    "description": "FamilyRoute serves all family related endpoints.",
+    "lineNumber": 10,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/routes/family.js~FamilyRoute",
+    "longname": "src/routes/family.js~FamilyRoute#constructor",
+    "access": null,
+    "description": "Place all routes inside the constructor, so that they will be built.",
+    "lineNumber": 14,
+    "params": [],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "router",
+    "memberof": "src/routes/family.js~FamilyRoute",
+    "longname": "src/routes/family.js~FamilyRoute#router",
+    "access": null,
+    "description": "Get the router instance for this class",
+    "lineNumber": 90,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/routes/file.js",
+    "memberof": null,
+    "longname": "src/routes/file.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Express from 'express'\nimport fs from 'fs'\nimport multer from 'multer'\nconst rtr = Express.Router();\n\n/**\n * FileRoute serves all file related endpoints.\n */\nexport default class FileRoute {\n  /**\n   * Place all routes inside the constructor, so that they will be built.\n   */\n  constructor() {\n\n    /**\n     * @api {post} /file/upload/ Upload a file to the server\n     * @apiName UploadFile\n     * @apiGroup File\n     *\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result Success object\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/upload/:id', multer({ dest: './files/'}).single('doc'), (req, res) => {\n      fs.readFile(process.cwd() + '/files/' + req.file.filename, function (err, data) {\n        if(err) res.status(500).send(err);\n        try {\n          fs.mkdirSync(process.cwd() + '/files/' + req.params.id);\n        } catch(e) {}\n\n        var newPath = process.cwd() + \"/files/\" + req.params.id + \"/\" + req.file.originalname;\n        fs.writeFile(newPath, data, function (err) {\n          if(err) res.status(500).send(err);\n          fs.unlinkSync(process.cwd() + '/files/' + req.file.filename);\n          res.send({success: true});\n        });\n      });\n    });\n\n    rtr.get('/list/:id', (req, res) => {\n      try {\n        fs.mkdirSync(process.cwd() + '/files/' + req.params.id);\n      } catch(e) {}\n      fs.readdir(process.cwd() + \"/files/\" + req.params.id, function(err, items) {\n          res.send(items);\n      });\n    });\n\n    rtr.get('/get/:id/:name', (req, res) => {\n      res.download(process.cwd() + \"/files/\" + req.params.id + \"/\" + req.params.name)\n    })\n\n  }\n\n  /**\n   * Get the router instance for this class\n   */\n  router() { return rtr; }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "rtr",
+    "memberof": "src/routes/file.js",
+    "longname": "src/routes/file.js~rtr",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/routes/file.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 4,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "FileRoute",
+    "memberof": "src/routes/file.js",
+    "longname": "src/routes/file.js~FileRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/routes/file.js",
+    "importStyle": "FileRoute",
+    "description": "FileRoute serves all file related endpoints.",
+    "lineNumber": 9,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/routes/file.js~FileRoute",
+    "longname": "src/routes/file.js~FileRoute#constructor",
+    "access": null,
+    "description": "Place all routes inside the constructor, so that they will be built.",
+    "lineNumber": 13,
+    "params": [],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "router",
+    "memberof": "src/routes/file.js~FileRoute",
+    "longname": "src/routes/file.js~FileRoute#router",
+    "access": null,
+    "description": "Get the router instance for this class",
+    "lineNumber": 62,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/routes/organization.js",
+    "memberof": null,
+    "longname": "src/routes/organization.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Organization from '../models/organization';\nimport OrganizationRequests from '../models/organizationrequests'\nimport Express from 'express'\n\nconst rtr = Express.Router();\n\n/**\n * OrganizationRoute serves all organization related endpoints.\n */\nexport default class OrganizationRoute {\n  /**\n   * Place all routes inside the constructor, so that they will be built.\n   */\n  constructor() {\n\n    /**\n     * @api {post} /organization/create/ Create New Organization\n     * @apiName CreateOrganization\n     * @apiGroup Organization\n     *\n     * @apiParam {Object} org The org object that you want to create.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"name\": 'Primary Health Care',\n     *       \"state\": 'NY',\n     *       \"address\": '123 Test Lane',\n     *       \"zip\": '12345',\n     *       \"phone\": \"1234567890\"\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": 1,\n     *       \"name\": 'Primary Health Care',\n     *       \"state\": 'NY',\n     *       \"address\": '123 Test Lane',\n     *       \"zip\": '12345',\n     *       \"phone\": \"1234567890\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the organization object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/create', (req, res) => {\n      Organization.create(req.body, (org, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(org);\n      });\n    });\n\n    /**\n     * @api {post} /organization/invite/ Invite a user to an organization\n     * @apiName InviteOrganization\n     * @apiGroup Organization\n     *\n     * @apiParam {Object} invite The user id and organization id to send invites for.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the invite object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/invite', (req, res) => {\n      OrganizationRequests.create(req.body, (invite, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(invite);\n      });\n    });\n\n    /**\n     * @api {get} /organization/providers/:org_id Get all doctors in an organization\n     * @apiName GetDoctors\n     * @apiGroup Organization\n     *\n     * @apiParam {number} org_id The organization ID to get doctors for\n     * @apiSuccess {Object} result JSON Object with array of doctors.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/providers/:org_id', (req, res) => {\n      Organization.get_providers(req.params.org_id, (providers, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(providers);\n      });\n    });\n\n    /**\n     * @api {get} /organization/get/:org_id Get all people in an organization\n     * @apiName GetPeople\n     * @apiGroup Organization\n     *\n     * @apiParam {number} org_id The organization ID to get people for\n     * @apiSuccess {Object} result JSON Object with the whole.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/get/:org_id', (req, res) => {\n      Organization.get_all(req.params.org_id, (org, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(org);\n      });\n    });\n\n  }\n\n  /**\n   * Get the router instance for this class\n   */\n  router() { return rtr; }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "rtr",
+    "memberof": "src/routes/organization.js",
+    "longname": "src/routes/organization.js~rtr",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/routes/organization.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "OrganizationRoute",
+    "memberof": "src/routes/organization.js",
+    "longname": "src/routes/organization.js~OrganizationRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/routes/organization.js",
+    "importStyle": "OrganizationRoute",
+    "description": "OrganizationRoute serves all organization related endpoints.",
+    "lineNumber": 10,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/routes/organization.js~OrganizationRoute",
+    "longname": "src/routes/organization.js~OrganizationRoute#constructor",
+    "access": null,
+    "description": "Place all routes inside the constructor, so that they will be built.",
+    "lineNumber": 14,
+    "params": [],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "router",
+    "memberof": "src/routes/organization.js~OrganizationRoute",
+    "longname": "src/routes/organization.js~OrganizationRoute#router",
+    "access": null,
+    "description": "Get the router instance for this class",
+    "lineNumber": 114,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "src/routes/provider.js",
+    "memberof": null,
+    "longname": "src/routes/provider.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import Provider from '../models/provider';\nimport OrganizationRequests from '../models/organizationrequests';\n\nimport Express from 'express'\nconst rtr = Express.Router();\n\n/**\n * ProviderRoute serves all provider related endpoints.\n */\nexport default class ProviderRoute {\n  /**\n   * Place all routes inside the constructor, so that they will be built.\n   */\n  constructor() {\n\n    /**\n     * @api {get} /provider/get/:email Request Provider information\n     * @apiName GetProvider\n     * @apiGroup Provider\n     *\n     * @apiParam {String} email Provider unique email.\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"ssn\": \"123456789\",\n     *       \"familyId\": \"1\",\n     *       \"firstName\": \"Pranav\",\n     *       \"lastName\": \"Sathy\",\n     *       \"email\": \"sathyp@rpi.edu\",\n     *       \"password\": \"test\",\n     *       \"organization\": {\n     *         \"id\": \"1\",\n     *         \"name\": \"Primary Provider\",\n     *         \"state\": \"NY\",\n     *         \"address\": \"123 Test Lane\",\n     *         \"zip\": \"12345\",\n     *         \"phone\": \"123456790\"\n     *       },\n     *       \"specializations\": [\n     *         {\n     *           \"code\": \"Some long code\",\n                 \"specialization\": \"Surgeon\"\n     *         }\n     *       ]\n     *     }\n     *\n     * @apiSuccess {Object} result JSON Object representing the admin object in the database.\n     * @apiError {String} err A statement that the requested email was invalid.\n     */\n    rtr.get('/get/:email', (req, res) => {\n      console.log(req.params.email);\n      Provider.get(req.params.email, (user, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(user);\n      });\n    });\n\n    /**\n     * @api {post} /provider/create/ Create New Provider\n     * @apiName CreateProvider\n     * @apiGroup Provider\n     *\n     * @apiParam {Object} user The user object that you want to create.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"ssn\": 123456789,\n     *       \"npi\": 123456789,\n     *       \"firstName\": \"Pranav\",\n     *       \"lastName\": \"Sathy\",\n     *       \"email\": \"sathyp@rpi.edu\",\n     *       \"password\": \"test\",\n     *       \"prefix\": \"Dr.\"\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"ssn\": 123456789,\n     *       \"npi\": 123456789,\n     *       \"firstName\": \"Pranav\",\n     *       \"lastName\": \"Sathy\",\n     *       \"email\": \"sathyp@rpi.edu\",\n     *       \"password\": \"test\",\n     *       \"prefix\": \"Dr.\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the provider object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/create', (req, res) => {\n      Provider.create(req.body, (user, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(user);\n      });\n    });\n\n    /**\n     * @api {post} /provider/assignSpecialization/ Assign a Specializatoin to Doctors\n     * @apiName CreateProvider\n     * @apiGroup Provider\n     *\n     * @apiParam {Object} assignment The object with provider email and their code.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"email\": \"test@provider.com\",\n     *       \"code\": \"101YA0400X\"\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       success: true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success variable set to true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/assignSpecialization', (req, res) => {\n      Provider.assignSpecialization(req.body, (spec, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(spec);\n      })\n    });\n\n    /**\n     * @api {get} /provider/get_org_invtes/:provider_id Get a providers invites\n     * @apiName GetOrgInvites\n     * @apiGroup Provider\n     *\n     * @apiParam {Number} provider_id The provider ID we want invites for.\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"id\": \"1\",\n     *       \"name\": \"Test Family\"\n     *     }\n     * @apiSuccess {Object} result JSON Object representing the invite object in the database.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.get('/get_org_invites/:provider_id', (req, res) => {\n      OrganizationRequests.get(req.params.provider_id, (orgs, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(orgs);\n      });\n    });\n\n\n    /**\n     * @api {post} /provider/accept_org_invite/ Accept a family invite\n     * @apiName AcceptOrgInvites\n     * @apiGroup Provider\n     *\n     * @apiParam {Object} invite An object with the user and organization id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/accept_org_invite', (req, res) => {\n      OrganizationRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else Provider.joinOrganization(req.body, (user, err) => {\n          if(err) return res.status(400).send(err);\n          else return res.send(user);\n        })\n      });\n    });\n\n    /**\n     * @api {post} /provider/reject_org_invite/ Reject an organization invite\n     * @apiName RejectOrgInvites\n     * @apiGroup Provider\n     *\n     * @apiParam {Object} invite An object with the user and organization id.\n     * @apiParamExample {json} Request-Example:\n     *     {\n     *       \"userId\": 1,\n     *       \"organizationId\": 3\n     *     }\n     * @apiSuccessExample {json} Success-Response:\n     *     HTTP/1.1 200 OK\n     *     {\n     *       \"success\": true\n     *     }\n     * @apiSuccess {Object} result JSON Object with success as true.\n     * @apiError {String} err An error statement regarding what went wrong.\n     */\n    rtr.post('/reject_org_invite', (req, res) => {\n      OrganizationRequests.delete(req.body, (deleted, err) => {\n        if(err) return res.status(400).send(err);\n        else return res.send(deleted);\n      });\n    });\n\n  }\n\n  /**\n   * Get the router instance for this class\n   */\n  router() { return rtr; }\n}\n"
+  },
+  {
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "rtr",
+    "memberof": "src/routes/provider.js",
+    "longname": "src/routes/provider.js~rtr",
+    "access": null,
+    "export": false,
+    "importPath": "ninja-backend-dbsrv/src/routes/provider.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "ProviderRoute",
+    "memberof": "src/routes/provider.js",
+    "longname": "src/routes/provider.js~ProviderRoute",
+    "access": null,
+    "export": true,
+    "importPath": "ninja-backend-dbsrv/src/routes/provider.js",
+    "importStyle": "ProviderRoute",
+    "description": "ProviderRoute serves all provider related endpoints.",
+    "lineNumber": 10,
+    "interface": false
+  },
+  {
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "src/routes/provider.js~ProviderRoute",
+    "longname": "src/routes/provider.js~ProviderRoute#constructor",
+    "access": null,
+    "description": "Place all routes inside the constructor, so that they will be built.",
+    "lineNumber": 14,
+    "params": [],
+    "generator": false
+  },
+  {
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "router",
+    "memberof": "src/routes/provider.js~ProviderRoute",
+    "longname": "src/routes/provider.js~ProviderRoute#router",
+    "access": null,
+    "description": "Get the router instance for this class",
+    "lineNumber": 206,
+    "params": [],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Infinity",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Infinity",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "NaN",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~NaN",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "undefined",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~undefined",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "null",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~null",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Object",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~object",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Function",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~function",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Boolean",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~boolean",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Symbol",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Symbol",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Error",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Error",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "EvalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~EvalError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "InternalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~InternalError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "RangeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RangeError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "ReferenceError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "SyntaxError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "TypeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~TypeError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "URIError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~URIError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Number",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~number",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Date",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Date",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "String",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~String",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "string",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~string",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "RegExp",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RegExp",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint8ClampedArray",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Float32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Float64Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Map",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Map",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Set",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Set",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "WeakMap",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "WeakSet",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "ArrayBuffer",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "DataView",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~DataView",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "JSON",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~JSON",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Promise",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Promise",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Generator",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Generator",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "GeneratorFunction",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Reflect",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Reflect",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Proxy",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Proxy",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "CanvasRenderingContext2D",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "DocumentFragment",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Element",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Element",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Element",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Event",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Event",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Event",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Node",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Node",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Node",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "NodeList",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~NodeList",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "XMLHttpRequest",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  }
+]

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/models/client.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+</head>
+<body class="layout-container">
+
+<header>
+  <a href="./">Home</a>
+  <a href="identifiers.html">Identifier</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/The-United-States-Of-America/ninja-backend-dbsrv" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div data-ice="classWrap">
+  <h2>Class</h2>
+  <ul>
+    
+  <li data-ice="classDoc"><span><a href="class/src/models/administrator.js~Administrator.html">Administrator</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/administrator.js~AdministratorRoute.html">AdministratorRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/appointments.js~AppointmentRoute.html">AppointmentRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/appointments.js~AppointmentsRoute.html">AppointmentsRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/client.js~Client.html">Client</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/client.js~ClientRoute.html">ClientRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/family.js~Family.html">Family</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/familyrequests.js~FamilyRequests.html">FamilyRequests</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/family.js~FamilyRoute.html">FamilyRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/file.js~FileRoute.html">FileRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/organization.js~Organization.html">Organization</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/organizationrequests.js~OrganizationRequests.html">OrganizationRequests</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/organization.js~OrganizationRoute.html">OrganizationRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/provider.js~Provider.html">Provider</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/provider.js~ProviderRoute.html">ProviderRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/Router.js~Router.html">Router</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/user.js~User.html">User</a></span></li>
+</ul>
+</div>
+
+
+
+
+
+<div data-ice="variableWrap">
+  <h2><a href="variable/">Variable</a></h2>
+  <ul>
+    
+  <li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MAdministrator">MAdministrator</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MAppointments">MAppointments</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MClient">MClient</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MFamily">MFamily</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MFamilyRequests">MFamilyRequests</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MOrganization">MOrganization</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MOrganizationRequests">MOrganizationRequests</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MProvider">MProvider</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MTaxonomy">MTaxonomy</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MUser">MUser</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-UserTypes">UserTypes</a></span></li>
+</ul>
+</div>
+
+
+
+
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/models/client.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import { User, UserTypes } from &apos;./user&apos;;
+import { MClient } from &apos;./models&apos;;
+
+/**
+ * The Client defines the patient table within the UHRNinja database
+ */
+export default class Client {
+
+  /**
+   * Create a new client after creating a new user.
+   * @param {object} [user_obj] - The JSON User Object that is destructured then stored
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Client.create({
+        ssn: 123456789,
+        firstName: &apos;Test&apos;,
+        lastName: &apos;User&apos;,
+        email: &apos;test@test.com&apos;,
+        password: &apos;test&apos;
+     })
+   */
+  static create(user_obj, cb) {
+    User.create(UserTypes.PATIENT, (user, err) =&gt; {
+      if(err) return cb(null, err);
+      user_obj.id = user.id;
+      new MClient(user_obj).save(null, {method: &apos;insert&apos;})
+      .then((user) =&gt; cb(user.toJSON()))
+      .catch((err) =&gt; cb(null, err));
+    });
+  }
+
+  /**
+   * Get a user based on the user&apos;s email.
+   * @param {String} [clientEmail] - The user email to query.
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Client.get(&apos;sathyp@rpi.edu&apos;)
+   */
+  static get(clientEmail, cb) {
+    MClient.where(&apos;email&apos;, clientEmail).fetch({withRelated: [&apos;family&apos;, &apos;organizations&apos;]})
+    .then((user) =&gt; cb(user.toJSON()))
+    .catch((err) =&gt; cb(null, err));
+  }
+
+  /**
+   * Join a family.
+   * @param {object} [query_obj] - Query object that houses the client ID and familyID
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Client.joinFamily({
+        clientId: 1,
+        familyId: 1
+     })
+   */
+  static joinFamily(query_obj, cb) {
+    new MClient({
+      id: query_obj.clientId,
+      familyId: query_obj.familyId
+    }).save()
+    .then(() =&gt; cb({success: true}))
+    .catch((err) =&gt; cb(null, err));
+  }
+
+  /**
+   * Let a client join an organization.
+   * @param {object} [query_obj] - Object containing userId and organizationId
+   * @param {function} [cb] - Callback function that takes two argument (obj, err)
+   * @example
+   * Client.joinOrganization({
+       userId: 1,
+       organizationId: 3
+     })
+   */
+  static joinOrganization(query_obj, cb) {
+    MClient.where(&apos;id&apos;, query_obj.userId).fetch({withRelated: [&apos;organizations&apos;]})
+    .then((user) =&gt; {
+      user.organizations().attach({
+        organizationId: query_obj.organizationId
+      })
+      .then(() =&gt; cb({success: true}))
+      .catch((err) =&gt; cb(null, err));
+    })
+    .catch((err) =&gt; cb(null, err));
+  }
+
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.2.6)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/routes/administrator.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+</head>
+<body class="layout-container">
+
+<header>
+  <a href="./">Home</a>
+  <a href="identifiers.html">Identifier</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="https://github.com/The-United-States-Of-America/ninja-backend-dbsrv" class="repo-url-github">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div data-ice="classWrap">
+  <h2>Class</h2>
+  <ul>
+    
+  <li data-ice="classDoc"><span><a href="class/src/models/administrator.js~Administrator.html">Administrator</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/administrator.js~AdministratorRoute.html">AdministratorRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/appointments.js~AppointmentRoute.html">AppointmentRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/appointments.js~AppointmentsRoute.html">AppointmentsRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/client.js~Client.html">Client</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/client.js~ClientRoute.html">ClientRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/family.js~Family.html">Family</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/familyrequests.js~FamilyRequests.html">FamilyRequests</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/family.js~FamilyRoute.html">FamilyRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/file.js~FileRoute.html">FileRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/organization.js~Organization.html">Organization</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/organizationrequests.js~OrganizationRequests.html">OrganizationRequests</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/organization.js~OrganizationRoute.html">OrganizationRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/provider.js~Provider.html">Provider</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/routes/provider.js~ProviderRoute.html">ProviderRoute</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/Router.js~Router.html">Router</a></span></li>
+<li data-ice="classDoc"><span><a href="class/src/models/user.js~User.html">User</a></span></li>
+</ul>
+</div>
+
+
+
+
+
+<div data-ice="variableWrap">
+  <h2><a href="variable/">Variable</a></h2>
+  <ul>
+    
+  <li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MAdministrator">MAdministrator</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MAppointments">MAppointments</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MClient">MClient</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MFamily">MFamily</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MFamilyRequests">MFamilyRequests</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MOrganization">MOrganization</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MOrganizationRequests">MOrganizationRequests</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MProvider">MProvider</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MTaxonomy">MTaxonomy</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-MUser">MUser</a></span></li>
+<li data-ice="variableDoc"><span><a href="variable/index.html#static-variable-UserTypes">UserTypes</a></span></li>
+</ul>
+</div>
+
+
+
+
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/routes/administrator.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import Administrator from &apos;../models/administrator&apos;;
+import OrganizationRequests from &apos;../models/organizationrequests&apos;;
+
+import Express from &apos;express&apos;
+const rtr = Express.Router();
+
+/**
+ * AdministratorRoute serves all administrator related endpoints.
+ */
+export default class AdministratorRoute {
+  /**
+   * Place all routes inside the constructor, so that they will be built.
+   */
+  constructor() {
+    /**
+     * @api {get} /admin/get/:email Request Administrator information
+     * @apiName GetAdmin
+     * @apiGroup Administrator
+     *
+     * @apiParam {String} email Admins unique email.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;id&quot;: &quot;1&quot;,
+     *       &quot;ssn&quot;: &quot;123456789&quot;,
+     *       &quot;familyId&quot;: &quot;1&quot;,
+     *       &quot;firstName&quot;: &quot;Pranav&quot;,
+     *       &quot;lastName&quot;: &quot;Sathy&quot;,
+     *       &quot;email&quot;: &quot;sathyp@rpi.edu&quot;,
+     *       &quot;password&quot;: &quot;test&quot;,
+     *       &quot;organization&quot;: {
+     *         &quot;id&quot;: &quot;1&quot;,
+     *         &quot;name&quot;: &quot;Primary Practice&quot;
+     *          ...
+     *       }
+     *     }
+     *
+     * @apiSuccess {Object} result JSON Object representing the admin object in the database.
+     * @apiError {String} err A statement that the requested email was invalid.
+     */
+    rtr.get(&apos;/get/:email&apos;, (req, res) =&gt; {
+      Administrator.get(req.params.email, (user, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(user);
+      });
+    });
+
+    /**
+     * @api {post} /admin/create/ Create New Administrator
+     * @apiName CreateAdmin
+     * @apiGroup Administrator
+     *
+     * @apiParam {Object} user The user object that you want to create.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       &quot;firstName&quot;: &apos;Pranav&apos;,
+     *       &quot;lastName&quot;: &apos;Sathy&apos;,
+     *       &quot;email&quot;: &apos;sathyp@rpi.edu&apos;,
+     *       &quot;password&quot;: &apos;test&apos;
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;id&quot;: &quot;1&quot;,
+     *       &quot;firstName&quot;: &quot;Pranav&quot;,
+     *       &quot;lastName&quot;: &quot;Sathy&quot;,
+     *       &quot;email&quot;: &quot;sathyp@rpi.edu&quot;,
+     *       &quot;password&quot;: &quot;test&quot;
+     *     }
+     * @apiSuccess {Object} result JSON Object representing the admin object in the database.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.post(&apos;/create&apos;, (req, res) =&gt; {
+      Administrator.create(req.body, (user, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(user);
+      });
+    });
+
+    /**
+     * @api {get} /client/get_org_invtes/:admin_id Get a clients invites
+     * @apiName GetOrgInvites
+     * @apiGroup Provider
+     *
+     * @apiParam {Number} admin_id The admin ID we want invites for.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;id&quot;: &quot;1&quot;,
+     *       &quot;name&quot;: &quot;Test Family&quot;
+     *     }
+     * @apiSuccess {Object} result JSON Object representing the invite object in the database.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.get(&apos;/get_org_invites/:admin_id&apos;, (req, res) =&gt; {
+      OrganizationRequests.get(req.params.admin_id, (orgs, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(orgs);
+      });
+    });
+
+    /**
+     * @api {post} /provider/accept_org_invite/ Accept a family invite
+     * @apiName AcceptOrgInvites
+     * @apiGroup Administrator
+     *
+     * @apiParam {Object} invite An object with the user and organization id.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       &quot;userId&quot;: 1,
+     *       &quot;organizationId&quot;: 3
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;success&quot;: true
+     *     }
+     * @apiSuccess {Object} result JSON Object with success as true.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.post(&apos;/accept_org_invite&apos;, (req, res) =&gt; {
+      OrganizationRequests.delete(req.body, (deleted, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else Administrator.joinOrganization(req.body, (user, err) =&gt; {
+          if(err) return res.status(400).send(err);
+          else return res.send(user);
+        })
+      });
+    });
+
+    /**
+     * @api {post} /client/reject_org_invite/ Reject an organization invite
+     * @apiName RejectOrgInvites
+     * @apiGroup Administrator
+     *
+     * @apiParam {Object} invite An object with the user and organization id.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *       &quot;userId&quot;: 1,
+     *       &quot;organizationId&quot;: 3
+     *     }
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       &quot;success&quot;: true
+     *     }
+     * @apiSuccess {Object} result JSON Object with success as true.
+     * @apiError {String} err An error statement regarding what went wrong.
+     */
+    rtr.post(&apos;/reject_org_invite&apos;, (req, res) =&gt; {
+      OrganizationRequests.delete(req.body, (deleted, err) =&gt; {
+        if(err) return res.status(400).send(err);
+        else return res.send(deleted);
+      });
+    });
+
+  }
+
+  /**
+   * Get the router instance for this class
+   */
+  router() { return rtr; }
+}
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.2.6)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
